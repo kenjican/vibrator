@@ -9,8 +9,12 @@ let express = require('express');
 let app = express();
 let serialP = require('serialport');
 let net = require('net');
-let b = new Buffer([0x01,0x05,0x00,0x05,0x00,0x00,0xDD,0xCB]);
-let a = new Buffer([0x01,0x05,0x00,0x05,0xFF,0x00,0x9C,0x3B]);
+let fs = require('fs');
+let vibrator1 = JSON.parse(fs.readFileSync('vibrator_1.json','utf8');
+
+
+//let b = new Buffer([0x01,0x05,0x00,0x05,0x00,0x00,0xDD,0xCB]);
+//let a = new Buffer([0x01,0x05,0x00,0x05,0xFF,0x00,0x9C,0x3B]);
 /*
 web server
 
@@ -20,7 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.get('/',function(req,res){
-  res.sendFile('/home/ubuntu/vibrator/index.htm');
+  res.sendFile('/home/kenji/vibrator/index.htm');
 });
 
 app.listen(8888);
