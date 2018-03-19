@@ -8,9 +8,8 @@ let bodyParser = require('body-parser');
 let express = require('express');
 let app = express();
 let serialP = require('serialport');
-let net = require('net');
 let fs = require('fs');
-let vibrator1 = JSON.parse(fs.readFileSync('vibrator_1.json','utf8');
+let vibrator1 = JSON.parse(fs.readFileSync('./PDAN.json','utf8');
 
 
 //let b = new Buffer([0x01,0x05,0x00,0x05,0x00,0x00,0xDD,0xCB]);
@@ -29,6 +28,17 @@ app.get('/',function(req,res){
 
 app.listen(8888);
 
+serialP.list(function(err,ports){
+  ports.forEach(function(port){
+    console.log(port.comName);
+    console.log(port.pnpId);
+    console.log(port.manufacturer);
+    console.log(port.locationId);
+    console.log(port.venderId);
+    console.log(port.productId);
+    console.log(port.deviceId);
+  });
+});
 
 /*
 vibrator serial command
@@ -42,12 +52,20 @@ let vibrator = new serialP('/dev/ttyUSB0',{
 });
 
 app.get('/run',function(req,res){
-  vibrator.write(b);
+  vibrator.write(Buffer.from(vibrator1.run));
   res.send("runinng");
 });
 
 app.get('/stop',function(req,res){
-  vibrator.write(a);
+  vibrator.write(Buffer.from(vibrator1.stop));
   res.send("sjtooping");
 });
 
+app.get('/setHz/:hz',function(req,res){
+  vibrator.write();
+  res.send();
+});
+
+app.get('/zeroHz'),function(req,res){
+  vibrator.write(Buffer.from(vibrator1.zeroHz));
+});
