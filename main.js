@@ -9,11 +9,40 @@ let express = require('express');
 let app = express();
 let serialP = require('serialport');
 let fs = require('fs');
-let vibrator1 = JSON.parse(fs.readFileSync('./PDAN.json','utf8');
+let mysql = require('mysql');
+let vibrator1 = JSON.parse(fs.readFileSync('./PDAN.json','utf8'));
+let WebSocketServer = require('ws').Server;
+let wss = new WebSocketServer({port:8887});
 
+function GetCRC(cmdnocrc){
+  let CRC = 0xffff;
+  let XorConst = 0xA001;
 
-//let b = new Buffer([0x01,0x05,0x00,0x05,0x00,0x00,0xDD,0xCB]);
-//let a = new Buffer([0x01,0x05,0x00,0x05,0xFF,0x00,0x9C,0x3B]);
+  for(i=0;i<=cmdnocrc.length-3;i++)
+{
+  CRC = CRC ^ cmdnocrc[i];
+  for(j=0;j<=7;j++)
+  {
+    if (CRC % 2 == 0)
+    {
+        CRC = CRC / 2;
+    }
+
+    else
+    {
+        CRC = (CRC -1) /2;
+        CRC = CRC ^ XorConst;
+    }
+  }
+
+}
+let tempCRC = new Uint8Array(2);
+tempCRC[0] = parseInt(CRC.toString(16).substring(2,4),16);
+tempCRC[1] = parseInt(CRC.toString(16).substring(0,2),16);
+
+  return tempCRC;
+}
+
 /*
 web server
 
@@ -51,6 +80,15 @@ let vibrator = new serialP('/dev/ttyUSB0',{
   parity:'none',
 });
 
+let computer = new serialP('./dev/ttyUSB1',{
+  baudRate:9600,
+  dataBits:8,
+  stopBits:1,
+  parity:'none'
+});
+
+
+
 app.get('/run',function(req,res){
   vibrator.write(Buffer.from(vibrator1.run));
   res.send("runinng");
@@ -66,6 +104,10 @@ app.get('/setHz/:hz',function(req,res){
   res.send();
 });
 
-app.get('/zeroHz'),function(req,res){
+app.get('/zeroHz',function(req,res){
   vibrator.write(Buffer.from(vibrator1.zeroHz));
 });
+
+
+
+
