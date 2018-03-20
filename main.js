@@ -4,6 +4,7 @@ purpose: Communicate with vibrator JPS PDAN-2022
 auther: Kenji Chen
 date: 2018-Feb-10
 */
+
 let bodyParser = require('body-parser');
 let express = require('express');
 let app = express();
@@ -43,20 +44,6 @@ tempCRC[1] = parseInt(CRC.toString(16).substring(0,2),16);
   return tempCRC;
 }
 
-/*
-web server
-
-*/
-app.use(express.static(__dirname));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-
-app.get('/',function(req,res){
-  res.sendFile('/home/kenji/vibrator/index.htm');
-});
-
-app.listen(8888);
-
 serialP.list(function(err,ports){
   ports.forEach(function(port){
     console.log(port.comName);
@@ -73,6 +60,9 @@ serialP.list(function(err,ports){
 vibrator serial command
 */
 
+const ByteLength = serialP.parsers.ByteLength;
+
+
 let vibrator = new serialP('/dev/ttyUSB0',{
   baudRate:19200,
   dataBits:8,
@@ -87,15 +77,35 @@ let computer = new serialP('./dev/ttyUSB1',{
   parity:'none'
 });
 
+const parser = vibrator.pipe(new ByteLength({length:8}));
 
+parser.on('data',console.log);
+
+
+
+/*
+web
+*/
+
+app.use(express.static(__dirname));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+
+app.get('/',function(req,res){
+  res.sendFile('/home/pi/vibrator/index.htm');
+});
+
+app.listen(8888);
 
 app.get('/run',function(req,res){
-  vibrator.write(Buffer.from(vibrator1.run));
+  console.log(vibrator1.MBs.run);
+  vibrator.write(Buffer.from(vibrator1.MBs.run,'hex'));
   res.send("runinng");
 });
 
 app.get('/stop',function(req,res){
-  vibrator.write(Buffer.from(vibrator1.stop));
+  console.log(vibrator1.MBs.stop);
+  vibrator.write(Buffer.from(vibrator1.MBs.stop,'hex'));
   res.send("sjtooping");
 });
 
@@ -105,9 +115,11 @@ app.get('/setHz/:hz',function(req,res){
 });
 
 app.get('/zeroHz',function(req,res){
-  vibrator.write(Buffer.from(vibrator1.zeroHz));
+  vibrator.write(Buffer.from(vibrator1.MBs.zeroHz));
 });
 
 
-
+app.get('/getHzPV',function(req,res){
+  vibrator.write(Buffer.from(vibrator1.MBs.getHzPV));
+});
 

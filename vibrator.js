@@ -1,5 +1,5 @@
 let xmlhttp = new XMLHttpRequest();
-let socket = new WebSocket('ws://192.168.0.11:8887');
+let socket = new WebSocket('ws://192.168.0.20:8887');
 
 socket.onmessage = function(msg){
 
