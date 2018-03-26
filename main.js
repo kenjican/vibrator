@@ -92,7 +92,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.get('/',function(req,res){
-  res.sendFile('/home/pi/vibrator/index.htm');
+  res.sendFile('/home/kenji/vibrator/index.htm');
 });
 
 app.listen(8888);
@@ -122,4 +122,11 @@ app.get('/zeroHz',function(req,res){
 app.get('/getHzPV',function(req,res){
   vibrator.write(Buffer.from(vibrator1.MBs.getHzPV));
 });
+
+
+
+/*
+Web Socket
+*/
+
 
