@@ -1,9 +1,9 @@
 let xmlhttp = new XMLHttpRequest();
 //let socket = new WebSocket('ws://192.168.0.20:8887');
-let socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
+let socket = new WebSocket('ws://192.168.0.10:8887');
 
 socket.onmessage = function(msg){
-
+//  $('#HzPV').val(
 
 }
 
@@ -27,10 +27,18 @@ $(document).ready(function(){
     xmlhttp.send();
   });
     
-  $('stopB').bind('click',function(){
+  $('#stopB').bind('click',function(){
     xmlhttp.open("GET",'/stop',true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
+   });
+
+  $('#setHzTxt').keyup(function(event){
+      if(event.keyCode === 13){
+        xmlhttp.open("GET",'/setHz/' + $('#setHzTxt').val(),true);
+        xmlhttp.responseType ='text';
+        xmlhttp.send();
+      }
    });
 
    let HzBarC = echarts.init($('#HzBarC')[0]); 
