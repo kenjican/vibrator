@@ -1,6 +1,6 @@
 /*
 version:0.1
-purpose: Communicate with vibrator JPS PDAN-2022
+purpose: Communicate with U1 JPS PDAN-2022 YUDIAN AI516
 auther: Kenji Chen
 date: 2018-Feb-10
 */
@@ -14,7 +14,7 @@ let app = express();
 let serialP = require('serialport');
 //let fs = require('fs');
 let mysql = require('mysql');
-let vibrator1 = JSON.parse(fs.readFileSync('./PDAN.json','utf8'));
+let U1json = JSON.parse(fs.readFileSync('./AI516.json','utf8'));
 let WebSocketServer = require('ws').Server;
 let http = require('http');
 let wss = new WebSocketServer({port:8887});
@@ -62,14 +62,14 @@ serialP.list(function(err,ports){
 });
 
 /*
-vibrator serial command
+U1 serial command
 */
 
 const ByteLength = serialP.parsers.ByteLength;
 
-const SHzBuf = Buffer.from(vibrator1.MBs.setHz);
+const SHzBuf = Buffer.from(U1json.MBs.setHz);
 
-let vibrator = new serialP('/dev/ttyUSB0',{
+let U1 = new serialP('/dev/ttyUSB0',{
   baudRate:19200,
   dataBits:8,
   stopBits:2,
@@ -85,10 +85,10 @@ let computer = new serialP('./dev/ttyUSB1',{
 });
 */
 
-let parser = vibrator.pipe(new ByteLength({length:7}));
+let parser = U1.pipe(new ByteLength({length:8}));
 
 parser.on('data',function(data){
-  switch (vibrator1.cmd){
+  switch (U1json.cmd){
     case 'SV':
      ()=>{http.get('http://localhost:8888/getHzPV')};
      console.log('SV : ' + data.readIntBE(3,2).toString());
@@ -113,45 +113,45 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 app.get('/',function(req,res){
-  res.sendFile('/home/pi/vibrator/index.htm');
+  res.sendFile('/home/kenji/vibrator/index.htm');
 });
 
 app.listen(8888);
 
 app.get('/run',function(req,res){
-  vibrator.cmd = "run";
-  parser = vibrator.pipe(new ByteLength({length:8}));
-  vibrator.write(Buffer.from(vibrator1.MBs.run,'hex'));
+  U1.cmd = "run";
+  parser = U1.pipe(new ByteLength({length:8}));
+  U1.write(Buffer.from(U1json.MBs.run,'hex'));
 });
 
 app.get('/stop',function(req,res){
-  vibrator.write(Buffer.from(vibrator1.MBs.stop,'hex'));
+  U1.write(Buffer.from(U1json.MBs.stop,'hex'));
   res.send("sjtooping");
 });
 
 app.get('/setHz/:hz',function(req,res){
-   let buf = vibrator1.MBs.setHz + parseInt(req.params.hz + '00',10).toString(16);
+   let buf = U1json.MBs.setHz + parseInt(req.params.hz + '00',10).toString(16);
    buf = Buffer.from(buf,'hex');
    buf = Buffer.concat([buf,GetCRC(buf)]);
-   vibrator.write(buf);
+   U1.write(buf);
    res.send();
 });
 
 app.get('/zeroHz',function(req,res){
-  vibrator.write(Buffer.from(vibrator1.MBs.zeroHz,'hex'));
+  U1.write(Buffer.from(U1json.MBs.zeroHz,'hex'));
 });
 
 
 app.get('/getHzPV',function(req,res){
- parser = vibrator.pipe(new ByteLength({length:7}));
-  vibrator1.cmd = "PV";
-  vibrator.write(Buffer.from(vibrator1.MBs.getHzPV,'hex'));
+ parser = U1.pipe(new ByteLength({length:8}));
+  U1json.cmd = "PV";
+  U1.write(Buffer.from(U1json.MBs.getHzPV,'hex'));
 });
 
 app.get('/getHzSV',function(req,res){
- parser = vibrator.pipe(new ByteLength({length:7}));
- vibrator1.cmd = "SV";
-  vibrator.write(Buffer.from(vibrator1.MBs.getHzSV,'hex'));
+ parser = U1.pipe(new ByteLength({length:8}));
+ U1json.cmd = "SV";
+  U1.write(Buffer.from(U1json.MBs.getHzSV,'hex'));
 });
 
 let t1 = setInterval(()=>{http.get('http://localhost:8888/getHzSV')},1000);

@@ -8,15 +8,27 @@
 
   "con":{
      "baudRate":38400,
-     "dataBits":8,
-     "stopBits":1,
-     "parity":"even"
+     "dataBits":7,
+     "stopBits":2,
+     "parity":"none"
    },
 
-  "cmd":{
-     "run":"",
-     "stop":"",
-     "jog":""
+  "cmdRTU":{
+     "run":"01062000000203CB",
+     "stop":"01062000000143CA",
+     "getPV":"0103210300017E36",
+     "getSV":"0103210200012FF6",
+     "setSV":"01062001",
+     "getPSS":"0103210100035E37"
+   },
+
+  "cmdASCII":{
+     "run":":010620000002D7\r\n",
+     "stop":":010620000001D8\r\n",
+     "getPV":":0103210300017E36",
+     "getSV":":0103210200012FF6",
+     "setSV":":01062001",
+     "getPSS":":010321010003D7\r\n"
    } 
 
 
