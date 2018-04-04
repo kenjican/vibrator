@@ -25,7 +25,10 @@ let parser = U1.pipe(new Readline({delimiter:'\r\n'}));
 parser.on('data',function(data){
   switch (data.length){
     case 21:
-      console.log(data);
+      VFDB.sts.stts = parseInt(data.slice(7,11),16);
+      VFDB.sts.PV = parseInt(data.slice(15,19),16);
+      VFDB.sts.SV = parseInt(data.slice(11,15),16);
+      sendsts();
       break;
  //   case :
  //     console.log(data);
@@ -68,10 +71,14 @@ app.get('/',function(req,res){
 
 app.get('/run',function(req,res){
   U1.write(VFDB.cmdASCII.run);
+  res.send('run sent');
+  res.end;
 });
 
 app.get('/stop',function(req,res){
- U1.write(VFDB.cmdASCII.stop);
+  U1.write(VFDB.cmdASCII.stop);
+  res.send('stop sent');
+  res.end;
 });
 
 app.get('/getPV',function(req,res){
@@ -80,6 +87,8 @@ app.get('/getPV',function(req,res){
 
 app.get('/getPSS',function(req,res){
   U1.write(VFDB.cmdASCII.getPSS);
+  res.send("ok");
+  res.end;
 });
 
 app.get('/setSV/:SV',function(req,res){
@@ -90,8 +99,14 @@ app.get('/setSV/:SV',function(req,res){
   sSV = sSV.toUpperCase();
   console.log(sSV);
   U1.write(sSV);
+  res.end;
 });
 
+function getLocalPSS(){
+  http.get('http://localhost:8888/getPSS',(res)=>{
+     //console.log(res);
+  });
+}
 
 app.listen(8888);
 
@@ -100,4 +115,17 @@ app.listen(8888);
 Timer
 */
 
-let t1 = setInterval(()=>{http.get('http://localhost:8888/getPSS')},1000);
+let t1 = setInterval(getLocalPSS,1000);
+
+
+/*
+WebSocket
+*/
+
+let wss = new WebSocketServer({port:8887});
+
+function sendsts(){
+  wss.clients.forEach((conn)=>{
+    conn.send(JSON.stringify(VFDB.sts));
+  });
+}

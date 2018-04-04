@@ -1,4 +1,10 @@
 {
+  "initCon":{
+     "baudRate":9600,
+     "dataBits":7,
+     "stopBits":2,
+     "parity":"none"
+   },
 
   "con":{
      "baudRate":38400,
@@ -7,6 +13,14 @@
      "parity":"none"
    },
 
+  "cmdRTU":{
+     "run":"01062000000203CB",
+     "stop":"01062000000143CA",
+     "getPV":"0103210300017E36",
+     "getSV":"0103210200012FF6",
+     "setSV":"01062001",
+     "getPSS":"0103210100035E37"
+   },
 
   "cmdASCII":{
      "run":":010620000002D7\r\n",
@@ -15,13 +29,10 @@
      "getSV":":0103210200012FF6",
      "setSV":":01062001",
      "getPSS":":010321010003D7\r\n"
-   }, 
+   } 
 
-  "sts":{
-     "stts":"",
-     "PV":"",
-     "SV":""
-  }
+
+
 
 
 }
