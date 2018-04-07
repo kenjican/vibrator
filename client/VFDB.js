@@ -9,10 +9,10 @@ xmlhttp.onreadystatechange = function (){
 };
 
 socket.onmessage = function(msg){
-  let VFDB = JSON.parse(msg.data);
-  $("#HzPV").text(VFDB.PV);
-  $("#HzSV").text(VFDB.SV);
-  $("#HzSts").text(VFDB.stts);
+  let a = JSON.parse(msg.data);
+  $("#HzPV").text(a.PV);
+  $("#HzSV").text(a.SV);
+  $("#HzSts").text(a.stts);
 }
 
 function run(){
@@ -26,6 +26,20 @@ function stop(){
   xmlhttp.responseType = 'text';
   xmlhttp.send();
 }
+
+function LRCchk(cmd){
+  let a = cmd.match(/../g).map(x=>parseInt(x,16));
+  let b = a.reduce((x,y)=>x+y);
+  let lrc = ((b - 1) ^ 0xFF).toString(16).toUpperCase();
+  lrc = lrc.padStart(2,'0').slice(-2);
+  return lrc;
+}
+
+let VFDBcmd;
+
+$.getJSON('./client/VFDBcmd.json',(data)=>{
+  VFDBcmd = data;
+});
 
 $(function(){
    $("#fEC").ECalendar({
@@ -51,12 +65,37 @@ $(document).ready(function(){
     xmlhttp.responseType = 'text';
     xmlhttp.send();
   });
-    
+
+  $('#testB').bind('click',function(){
+    let a = LRCchk($('#test').val());
+    console.log(a);
+    xmlhttp.open("GET",'/test/:' + $('#test').val() + a,true);
+    xmlhttp.responseType = 'text';
+    xmlhttp.send();
+   });
+
+  
   $('#stopB').bind('click',function(){
     xmlhttp.open("GET",'/stop',true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
    });
+
+  $('.setB').bind('click',function(){
+     let v = parseInt($('#' + VFDBcmd[this.id][0]).val()) * VFDBcmd[this.id][1];
+     v = v.toString(16).padStart(4,'0');
+     let cmd = VFDBcmd.MNo + VFDBcmd[this.id][0] + v.toUpperCase();
+     cmd += LRCchk(cmd);
+     console.log(cmd);
+     xmlhttp.open("GET",'/test/' + cmd ,true);
+     xmlhttp.responseType = 'text';
+     xmlhttp.send();
+/*
+     $.get('/test/:' + cmd,function(data){
+        console.log(data);
+       });
+*/  
+  });
 
   $('#setHzTxt').keyup(function(event){
       if(event.keyCode === 13){

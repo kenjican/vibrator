@@ -3,8 +3,8 @@
     "host":"localhost",
     "user":"root",
     "password":"chenjia1!",
-    "database":"AI516",
-    "table":"AI516_1"
+    "database":"VFDB",
+    "table":"Apr04"
   },
 
   "sql":{

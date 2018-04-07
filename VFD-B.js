@@ -26,10 +26,11 @@ parser.on('data',function(data){
   switch (data.length){
     case 21:
       VFDB.sts.stts = parseInt(data.slice(7,11),16);
-      VFDB.sts.PV = parseInt(data.slice(15,19),16);
-      VFDB.sts.SV = parseInt(data.slice(11,15),16);
+      VFDB.sts.PV = parseInt(data.slice(15,19),16)/100;
+      VFDB.sts.SV = parseInt(data.slice(11,15),16)/100;
       sendsts();
-      break;
+      //http.get('http://localhost:8889/insert/'+JSON.stringify(VFDB.sts) ,(res)=>{});
+     break;
  //   case :
  //     console.log(data);
  //    break;
@@ -102,6 +103,13 @@ app.get('/setSV/:SV',function(req,res){
   res.end;
 });
 
+app.get('/test/:cmd',function (req,res){
+  console.log(req.params.cmd);
+  U1.write(':' + req.params.cmd +'\r\n');
+  res.send(req.params.cmd);
+  res.end;
+  });
+
 function getLocalPSS(){
   http.get('http://localhost:8888/getPSS',(res)=>{
      //console.log(res);
@@ -115,7 +123,7 @@ app.listen(8888);
 Timer
 */
 
-let t1 = setInterval(getLocalPSS,1000);
+//let t1 = setInterval(getLocalPSS,1000);
 
 
 /*
