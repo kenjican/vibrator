@@ -33,6 +33,7 @@ app.get('/insert/:sts',(req,res)=>{
   let sql = `insert into Apr04 (PV, SV, Sts) values (${d.PV},${d.SV},${d.stts})`;
   con.query(sql); 
   //console.log(sql);
+  res.send('ok');
   res.end();
 });
 

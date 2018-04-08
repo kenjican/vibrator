@@ -81,6 +81,13 @@ $(document).ready(function(){
     xmlhttp.send();
    });
 
+  $('#runStpsB').click(()=>{
+    xmlhttp.open("GET",'/stps',true);
+    xmlhttp.responseType = "text";
+    xmlhttp.send();
+   });
+
+
   $('.setB').bind('click',function(){
      let v = parseInt($('#' + VFDBcmd[this.id][0]).val()) * VFDBcmd[this.id][1];
      v = v.toString(16).padStart(4,'0');
