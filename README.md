@@ -6,3 +6,6 @@
 5:Serialport delimiter readline would remove the delimiter,,,such as \r\n,so the feedback length is two bytes less.
 6: step ..how to set timer? generator? or a setTimeout loop?
   solution: setTimeout self loop.
+7:Dynamic function,change the content of function on the fly...best solution is assign function to variable ,then assign different function to that variable.
+8:set parameters dynamically...such as mysql socket,,to be localhost or remote server, put these dynamic parameters in json file and change on the fly.
+

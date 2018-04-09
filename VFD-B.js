@@ -10,6 +10,25 @@ const app = express();
 const http = require('http');
 
 /*
+functions for switch
+*/
+
+const insSql = function (){http.get('http://localhost:8889/insert/'+JSON.stringify(VFDB.sts) ,(res)=>{});}
+const noinsSql = function(){};
+let swtchSql = noinsSql;
+
+
+const getPSS = function(){http.get('http://localhost:8888/getPSS',(res)=>{});}
+const pssLoga = function(){
+                 runLoga();
+                 http.get('http://localhost:8888/getPSS',(res)=>{});
+               }
+let swtchLoga = getPSS;
+
+
+
+
+/*
 Set up serial port
 */
 
@@ -29,14 +48,14 @@ parser.on('data',function(data){
       VFDB.sts.PV = parseInt(data.slice(15,19),16)/100;
       VFDB.sts.SV = parseInt(data.slice(11,15),16)/100;
       sendsts();
-      http.get('http://localhost:8889/insert/'+JSON.stringify(VFDB.sts) ,(res)=>{});
+      swtchSql();
      break;
  //   case :
  //     console.log(data);
  //    break;
 
     default:
-      console.log(data);
+      //console.log(data);
       break;
 
    }
@@ -57,7 +76,7 @@ function LRCchk(cmd){
 /*
 Steps logic and function
 */
-let Stps = VFDB.stps;
+let Stps = VFDB.stps.mltLvl;
 function runStps(){
   let a = Stps.shift();
   let stpsLength = Stps.length;
@@ -76,6 +95,27 @@ function runStps(){
 
 }
 
+/*
+Logarithm logic and function
+*/
+VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
+VFDB.lgrm.loop *= 2;
+
+function runLoga(){
+  let SV2hex = 10 ** (VFDB.lgrm.log10/VFDB.lgrm.tm*VFDB.lgrm.lcount) + VFDB.lgrm.strt;
+  console.log(SV2hex);
+  if((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)){
+    VFDB.lgrm.loop -= 1;
+    if(VFDB.lgrm.loop == 0){
+      swtchLoga = getPSS;
+      return;
+    }
+    VFDB.lgrm.drc = VFDB.lgrm.drc - (VFDB.lgrm.drc * 2);
+  }
+
+  VFDB.lgrm.lcount += VFDB.lgrm.drc;
+
+}
 
 /*
 Web
@@ -90,12 +130,14 @@ app.get('/',function(req,res){
 });
 
 app.get('/run',function(req,res){
+  swtchSql = insSql;
   U1.write(VFDB.cmdASCII.run);
   res.send('run sent');
   res.end;
 });
 
 app.get('/stop',function(req,res){
+  swtchsql = noinsSql;
   U1.write(VFDB.cmdASCII.stop);
   res.send('stop sent');
   res.end;
@@ -137,6 +179,12 @@ app.get('/stps',function (req,res){
   res.end;
   });
 
+app.get('/runLoga',function(req,res){
+  swtchLoga = pssLoga;
+  res.send('ok');
+  res.end;
+});
+
 
 function getLocalPSS(){
   http.get('http://localhost:8888/getPSS',(res)=>{
@@ -154,8 +202,8 @@ app.listen(8888);
 Timer
 */
 
-let t1 = setInterval(getLocalPSS,1000);
-
+let t1 = setInterval(swtchLoga,1000);
+//let t1 = setInterval(runLoga,1000);
 
 /*
 WebSocket
