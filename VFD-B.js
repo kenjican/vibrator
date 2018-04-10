@@ -13,16 +13,16 @@ const http = require('http');
 functions for switch
 */
 
-const insSql = function (){http.get('http://localhost:8889/insert/'+JSON.stringify(VFDB.sts) ,(res)=>{});}
+const insSql = function (){http.get('http://localhost:8889/insert/'+JSON.stringify(VFDB.sts) ,(res)=>{});};
 const noinsSql = function(){};
 let swtchSql = noinsSql;
 
 
-const getPSS = function(){http.get('http://localhost:8888/getPSS',(res)=>{});}
+const getPSS = function(){http.get('http://localhost:8888/getPSS',(res)=>{});};
 const pssLoga = function(){
-                 runLoga();
                  http.get('http://localhost:8888/getPSS',(res)=>{});
-               }
+                 runLoga();
+               };
 let swtchLoga = getPSS;
 
 
@@ -44,7 +44,8 @@ let parser = U1.pipe(new Readline({delimiter:'\r\n'}));
 parser.on('data',function(data){
   switch (data.length){
     case 21:
-      VFDB.sts.stts = parseInt(data.slice(7,11),16);
+      VFDB.sts.DT = new Date().toLocaleString();
+      VFDB.sts.stts = data.slice(9,11);
       VFDB.sts.PV = parseInt(data.slice(15,19),16)/100;
       VFDB.sts.SV = parseInt(data.slice(11,15),16)/100;
       sendsts();
@@ -103,7 +104,12 @@ VFDB.lgrm.loop *= 2;
 
 function runLoga(){
   let SV2hex = 10 ** (VFDB.lgrm.log10/VFDB.lgrm.tm*VFDB.lgrm.lcount) + VFDB.lgrm.strt;
-  console.log(SV2hex);
+  SV2hex = parseInt(SV2hex * 100).toString(16).padStart(4,'0').toUpperCase();
+  let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1,) + SV2hex);
+  let sSV = VFDB.cmdASCII.setSV + SV2hex + LRC + '\r\n';
+  sSV = sSV.toUpperCase();
+  U1.write(sSV);
+ //http.get('http://localhost:8888/setSV/' + SV2hex.toFixed(2),(res)=>{});
   if((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)){
     VFDB.lgrm.loop -= 1;
     if(VFDB.lgrm.loop == 0){
@@ -124,7 +130,14 @@ Web
 app.use('/client',express.static('./client'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
+/*
+app.use((req,res,next)=>{
+  res.header("Access-Control-Allow-Origin","*");
+  res.header("Access-Control-Allow-Headers","Origin,X-Request-With,Content-Type,Accept");
+  next();
+});
 
+*/
 app.get('/',function(req,res){
   res.sendFile('/home/kenji/vibrator/index.htm');
 });
@@ -137,7 +150,7 @@ app.get('/run',function(req,res){
 });
 
 app.get('/stop',function(req,res){
-  swtchsql = noinsSql;
+  //swtchSql = noinsSql;
   U1.write(VFDB.cmdASCII.stop);
   res.send('stop sent');
   res.end;
@@ -186,6 +199,8 @@ app.get('/runLoga',function(req,res){
 });
 
 
+
+
 function getLocalPSS(){
   http.get('http://localhost:8888/getPSS',(res)=>{
      //console.log(res);
@@ -202,7 +217,7 @@ app.listen(8888);
 Timer
 */
 
-let t1 = setInterval(swtchLoga,1000);
+let t1 = setInterval(()=>swtchLoga(),1000);
 //let t1 = setInterval(runLoga,1000);
 
 /*

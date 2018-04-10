@@ -1,7 +1,8 @@
 let xmlhttp = new XMLHttpRequest();
 //let socket = new WebSocket('ws://192.168.0.20:8887');
 let socket = new WebSocket('ws://192.168.0.11:8887');
-
+let HzBarC;
+let DT=[],PV=[],SV=[];
 xmlhttp.onreadystatechange = function (){
   if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
     console.log(xmlhttp.response);
@@ -10,9 +11,24 @@ xmlhttp.onreadystatechange = function (){
 
 socket.onmessage = function(msg){
   let a = JSON.parse(msg.data);
+  $("#SDT").text(a.DT);
   $("#HzPV").text(a.PV);
   $("#HzSV").text(a.SV);
   $("#HzSts").text(a.stts);
+  if(parseInt(a.stts,16) & 0x10 == 0x10){
+    DT.push(a.DT);
+    PV.push(a.PV);
+    SV.push(a.SV);
+    HzBarC.setOption({
+      xAxis:{data:DT},
+      series:[{
+        name:'PV',
+        data:PV},
+     {name:'SV',
+      data:SV}
+     ]
+    });
+ }
 }
 
 function run(){
@@ -34,6 +50,24 @@ function LRCchk(cmd){
   lrc = lrc.padStart(2,'0').slice(-2);
   return lrc;
 }
+
+function parseHis(result){
+  for(let i=0;i<result.length;i++){
+    DT[i] = result[i].DateTime;
+    PV[i] = result[i].PV;
+    SV[i] = result[i].SV;
+  }
+  HzBarC.setOption({
+    xAxis:{data:DT},
+    series:[{
+      name:'PV',
+      data:PV},
+   {name:'SV',
+    data:SV}
+   ]
+   })
+}
+
 
 let VFDBcmd;
 
@@ -87,6 +121,17 @@ $(document).ready(function(){
     xmlhttp.send();
    });
 
+  $('#getHisB').click(()=>{
+    let url = `http://192.168.0.11:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
+    $.get(url,(result)=>{
+      parseHis(result);
+    });
+/*
+    xmlhttp.open("GET",`http://192.168.0.11:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`,true);
+    xmlhttp.responseType = "text";
+    xmlhttp.send();
+*/
+  });
 
   $('.setB').bind('click',function(){
      let v = parseInt($('#' + VFDBcmd[this.id][0]).val()) * VFDBcmd[this.id][1];
@@ -112,15 +157,14 @@ $(document).ready(function(){
       }
    });
 
-   let HzBarC = echarts.init($('#HzBarC')[0]); 
-
+   HzBarC = echarts.init($('#HzBarC')[0]); 
    HzBarC.setOption({
      title:{
        text:'振动频率图text',
        subtext:'sub text'
      },
      legend:{
-       data:['振动PV_Legend','振动SV']
+       data:['PV','SV']
      },
      tooltip:{
        trigger:'axis'
@@ -129,7 +173,7 @@ $(document).ready(function(){
        {
         type:'slider',
         xAxisIndex:0,
-        start:80,
+        start:0,
         end:100
        },
        {
@@ -147,7 +191,7 @@ $(document).ready(function(){
        ],
 
      xAxis:{
-
+       data:[]
      },
      yAxis:[
        {
@@ -159,6 +203,14 @@ $(document).ready(function(){
         axisLabel:{
           formatter:'{value} Hz'
         }
-      }]
+      }],
+     series:[{
+     name:'PV',
+     type:'line',
+     data:[]},
+     {name:'SV',
+      type:'bar',
+     data:[]}
+     ]
      });
 });

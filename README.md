@@ -8,4 +8,4 @@
   solution: setTimeout self loop.
 7:Dynamic function,change the content of function on the fly...best solution is assign function to variable ,then assign different function to that variable.
 8:set parameters dynamically...such as mysql socket,,to be localhost or remote server, put these dynamic parameters in json file and change on the fly.
-
+9:conver query result to one array per column. It's for echarts rendering.Failed, can not find the query format.

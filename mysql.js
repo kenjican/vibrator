@@ -27,14 +27,37 @@ con.connect((err)=>{
 /*
 Web
 */
+app.use((req,res,next)=>{
+  res.header("Access-Control-Allow-Origin","*");
+  res.header("Access-Control-Allow-Headers","Origin,X-Request-With,Content-Type,Accept");
+  next();
+});
 
 app.get('/insert/:sts',(req,res)=>{
   let d = JSON.parse(req.params.sts);
   let sql = `insert into Apr04 (PV, SV, Sts) values (${d.PV},${d.SV},${d.stts})`;
+  console.log(sql);
   con.query(sql); 
   //console.log(sql);
   res.send('ok');
   res.end();
 });
 
+app.get('/getHis/:fDate/:tDate',(req,res)=>{
+  let sql = `select DateTime,PV,SV from Apr04 where DateTime between '${req.params.fDate}' and '${req.params.tDate}' and (id mod 5 = 0)`; 
+  console.log(sql);
+  con.query(sql,(err,result,fields)=>{
+    if(err) throw err;
+    //console.log(result.length);
+    res.send(result);
+   });
+//  res.send(result);
+  res.end;
+
+});
+
+app.get('/',(req,res)=>{
+  res.send('OF');
+  res.end;
+});
 app.listen(8889);
