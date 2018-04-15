@@ -1,8 +1,8 @@
 {
   "MNo":"01",
   "setSV":["062001",100],
-  "setFan":["06030C",1]
-
+  "setFan":["06030C",1],
+  "wssUrl":"ws://suzhou.kenjichen.com:8887"
 
 
 }

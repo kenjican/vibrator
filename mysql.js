@@ -35,9 +35,11 @@ app.use((req,res,next)=>{
 
 app.get('/insert/:sts',(req,res)=>{
   let d = JSON.parse(req.params.sts);
-  let sql = `insert into Apr04 (PV, SV, Sts) values (${d.PV},${d.SV},${d.stts})`;
-  console.log(sql);
-  con.query(sql); 
+  let sql = `insert into Apr04 (PV, SV, Sts) values (${d.PV},${d.SV},${parseInt(d.stts)})`;
+  //console.log(sql);
+  con.query(sql,(err,result)=>{
+    if(err) throw err;
+  }); 
   //console.log(sql);
   res.send('ok');
   res.end();

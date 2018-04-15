@@ -1,7 +1,8 @@
 let xmlhttp = new XMLHttpRequest();
-//let socket = new WebSocket('ws://192.168.0.20:8887');
-let socket = new WebSocket('ws://192.168.0.11:8887');
+let socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
+//let socket;// = new WebSocket('ws://192.168.0.11:8887');
 let HzBarC;
+let t1 = 0;
 let DT=[],PV=[],SV=[];
 xmlhttp.onreadystatechange = function (){
   if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
@@ -9,27 +10,51 @@ xmlhttp.onreadystatechange = function (){
   }
 };
 
-socket.onmessage = function(msg){
-  let a = JSON.parse(msg.data);
-  $("#SDT").text(a.DT);
-  $("#HzPV").text(a.PV);
-  $("#HzSV").text(a.SV);
-  $("#HzSts").text(a.stts);
-  if(parseInt(a.stts,16) & 0x10 == 0x10){
-    DT.push(a.DT);
-    PV.push(a.PV);
-    SV.push(a.SV);
-    HzBarC.setOption({
-      xAxis:{data:DT},
-      series:[{
-        name:'PV',
-        data:PV},
-     {name:'SV',
-      data:SV}
-     ]
-    });
- }
+function rcws(){
+
+  socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
+
+  socket.onmessage = function(msg){
+    let a = JSON.parse(msg.data);
+    $("#SDT").text(a.DT);
+    $("#HzPV").text(a.PV);
+    $("#HzSV").text(a.SV);
+    $("#HzSts").text(a.stts);
+    if((parseInt(a.stts.slice(0,2),16) & 0x10) == 0x10){
+      DT.push(a.DT);
+      //PV.push(a.PV);
+      SV.push(a.SV);
+      HzBarC.setOption({
+        xAxis:{data:DT},
+        series:[{
+          name:'PV',
+          data:PV},
+       {name:'SV',
+        data:SV}
+       ]
+      });
+   }
+  }
+
+  socket.onclose = ()=>{
+    console.log("closee");
+    if(!t1){
+      console.log("15 secs triggered");
+      t1 = setInterval(rcws,5000);
+    }
+  };
+  
+  socket.onopen = ()=>{
+    console.log('opend');
+    if(t1){
+      clearInterval(t1);
+      t1 = 0;
+    }
+  };
+  
+  
 }
+rcws();
 
 function run(){
   xmlhttp.open("GET",'/run',true);
@@ -65,7 +90,7 @@ function parseHis(result){
    {name:'SV',
     data:SV}
    ]
-   })
+   },true)
 }
 
 
@@ -95,7 +120,7 @@ $(function(){
 });
 $(document).ready(function(){
   $('#runB').bind('click',function(){
-    xmlhttp.open("GET",'/run',true);
+    xmlhttp.open("GET",$('input[name=opMode]:checked').val(),true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
   });
@@ -121,8 +146,9 @@ $(document).ready(function(){
     xmlhttp.send();
    });
 
+
   $('#getHisB').click(()=>{
-    let url = `http://192.168.0.11:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
+    let url = `http://suzhou.kenjichen.com:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
     $.get(url,(result)=>{
       parseHis(result);
     });
@@ -161,13 +187,20 @@ $(document).ready(function(){
    HzBarC.setOption({
      title:{
        text:'振动频率图text',
-       subtext:'sub text'
      },
      legend:{
        data:['PV','SV']
      },
      tooltip:{
        trigger:'axis'
+     },
+     toolbox:{
+       show:true,
+       feature:{
+         dataView:{readOnly:false},
+         restore:{},
+         saveAsImage:{}
+       }
      },
      dataZoom:[
        {
@@ -199,6 +232,7 @@ $(document).ready(function(){
         name:'Hz',
         min:0,
         max:100,
+        maxInterval:10,
         position:'left',
         axisLabel:{
           formatter:'{value} Hz'
@@ -209,7 +243,8 @@ $(document).ready(function(){
      type:'line',
      data:[]},
      {name:'SV',
-      type:'bar',
+      type:'line',
+      step:'middle',
      data:[]}
      ]
      });
