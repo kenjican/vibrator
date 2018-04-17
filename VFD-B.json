@@ -54,12 +54,13 @@
   },
 
   "linear":{
-    "strt":0,
-    "span":60,
-    "tm":60,
-    "lcount":1,
+    "strt":60,
+    "end":0,
+    "tm":50,
+    "rstrt":0,
+    "lcount":0,
     "loop":100,
-    "drc":1
+    "Arith":0
   }
 
 }

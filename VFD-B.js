@@ -185,8 +185,43 @@ function setSV(sv) {
   setQ(sSV);
 }
 
-function runLiner(){
+VFDB.linear.loop *= 2;
 
+function runLinear(){
+  if(VFDB.linear.lcount == VFDB.linear.tm){
+    VFDB.linear.loop -= 1;
+    VFDB.linear.Arith *= -1;
+    if(VFDB.linear.loop ==0){
+      swtchSql = noinsSql;
+      swtchLoga = noinsSql;
+      setQ(VFDB.cmdASCII.stop);
+      return;
+    }
+    VFDB.linear.lcount = 0;
+    if(VFDB.linear.loop % 2 != 0){
+      VFDB.linear.rstrt = VFDB.linear.end;
+    }else{
+      VFDB.linear.rstrt = VFDB.linear.strt;
+    }
+  }
+/*     
+  //setSV(VFDB.linear.nowSV);
+  console.log(VFDB.linear.nSV);
+  if(VFDB.linear.lcount > VFDB.linear.tm){
+    VFDB.linear.lcount = 0;
+    VFDB.linear.Arith *= -1;
+    VFDB.linear.loop -= 1; 
+    if(VFDB.linear.loop ==0){
+      swtchLoga = noinsSql;
+      swtchSql = noinsSql;
+      setQ(VFDB.cmdASCII.stop);
+      return;
+    }
+  }	  
+*/
+ //setSV(VFDB.linear.Arith * VFDB.linear.lcount + VFDB.linear.rstrt) ; 
+ setSV(VFDB.linear.Arith * VFDB.linear.lcount + VFDB.linear.rstrt) ; 
+ VFDB.linear.lcount +=1;
 }
 
 
@@ -279,7 +314,15 @@ app.get('/runLoga', function(req, res) {
 });
 
 
-
+app.get('/runLinear',(req,res)=>{
+  swtchSql =insSql;
+  swtchLoga = runLinear;
+  VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
+  res.send('ok');
+  VFDB.linear.rstrt = VFDB.linear.strt;
+  setTimeout(()=>setQ(VFDB.cmdASCII.run),500);
+  res.end;
+});
 
 function getLocalPSS() {
   http.get('http://localhost:8888/getPSS', (res) => {
