@@ -50,10 +50,9 @@ app.get('/getHis/:fDate/:tDate',(req,res)=>{
   console.log(sql);
   con.query(sql,(err,result,fields)=>{
     if(err) throw err;
-    //console.log(result.length);
+    //console.log(result);
     res.send(result);
    });
-//  res.send(result);
   res.end;
 
 });

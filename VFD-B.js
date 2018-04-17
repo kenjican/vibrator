@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 const fs = require('fs');
 const VFDB = JSON.parse(fs.readFileSync('./VFD-B.json'));
 const bodyParser = require('body-parser');
@@ -184,6 +184,11 @@ function setSV(sv) {
   console.log(sSV);
   setQ(sSV);
 }
+
+function runLiner(){
+
+}
+
 
 /*
 Web

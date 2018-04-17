@@ -9,3 +9,16 @@
 7:Dynamic function,change the content of function on the fly...best solution is assign function to variable ,then assign different function to that variable.
 8:set parameters dynamically...such as mysql socket,,to be localhost or remote server, put these dynamic parameters in json file and change on the fly.
 9:conver query result to one array per column. It's for echarts rendering.Failed, can not find the query format.
+
+
+
+
+/*
+Interface Design
+*/
+
+Color Scheme:
+1:background : black or dark gray
+2:same or similar brightness ,saturation.High contrast with background
+3:distict functions by color
+4:feel light and vigorous

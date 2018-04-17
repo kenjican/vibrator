@@ -13,31 +13,37 @@
 <script src="./client/VFDB.js"></script>
 </head>
 <body>
-<h1></h1>
 <div id="HzBarC"></div>
-<label id="HzPV">HzPV</label>
-<label id="HzSV">HzSV</label>
+<table id="dashboard">
+	<tr><td>目前频率</td><td>规定振幅Z</td><td>测试时间</td><td>剩余时间</td><td>扫频时间</td><td>扫频次数</td><td>起始频率</td><td>终止频率</td><td>目前阶数</td></tr>
+	<tr><td><label id="HzSV">0</label></td><td>2mm</td><td>15HR</td><td>5Hr</td><td>3HR</td><td>20</td><td>10</td><td>55</td><td>5</td></tr>
+</table>
+<!--
+<label id="HzPV">0</label>
+<label id="HzSV">0</label>
+
 <label id="HzSts">HzSts</label>
 <label id="SDT">datetime</label><BR>
-<input type="button" value="run" id="runB"></input>
-<input type="button" value="stop" id="stopB"></input>
-<input type="number" id="062001"></input>
-<input type="button" value="设频率" id="setSV" class="setB"></input><BR>
-<input type="radio" name="opMode" value="/run" checked="checked">定频</input>
-<input type="radio" name="opMode" value="/runLoga">对数</input>
-<input type="radio" name="opMode" value="/stps">多阶</input>
-<!--
-<input type="text" id="test"></input>
-<input type="button" value="test" id="testB"></input>
-<input type="number" id="06030C"></input>
-<input type="button" value="设风扇" id="setFan" class="setB"></input>
-<input type="button" value="多阶振动" id="runStpsB"></input>
 -->
+<div id="ctrlboard">
+<button type="button" value="run" id="runB">run</button>
+<button type="button" value="stop" id="stopB">stop</button>
+<button type="button" id="stpdown">递减</button>
+<input type="number" value="0" id="062001" min="0" max="100"></input>
+<button type="button" id="stpup">递增</button>
+<button type="button" value="设频率" id="setSV" class="setB">setSV</button>
+<label class="opL"><input type="radio" name="opMode" value="/run" checked="checked">定频</input></label>
+<label class="opL"><input type="radio" name="opMode" value="/runLoga">对数扫频</input></label>
+<label class="opL"><input type="radio" name="opMode" value="/runliner">线性扫频</input></label>
+<label class="opL"><input type="radio" name="opMode" value="/stps">多阶</input></label>
+</div>
+<!--
 <div class="calendarWarp">
 <input type="text" name="date" class="ECalendar" id="fEC">TO
 <input type="text" name="tdate" class="ECalendar" id="tEC">
 <input type="button" value="历史曲线" id="getHisB"></input>
 </div>
+-->
 </body>
 </html>
 

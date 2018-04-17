@@ -51,6 +51,15 @@
     "lcount": 1,
     "loop": 100,
     "drc": 1
+  },
+
+  "linear":{
+    "strt":0,
+    "span":60,
+    "tm":60,
+    "lcount":1,
+    "loop":100,
+    "drc":1
   }
 
 }

@@ -1,6 +1,44 @@
+body{
+  background-color:#000000;
+
+}
+/*
+label{
+  color:#ffaf51;
+  font-size:1.5em;
+}
+*/
+td{
+  border:2px dashed #454345;
+  text-align:center;
+}
+
+button{
+  display:inline-block;
+  border-radius:50%;
+  height:50px;
+  width:50px;
+}
+
+.opL{
+  font-size:1.8em;
+  color:#ffaf51;
+}
+
+#dashboard{
+  margin:0 auto;
+  width:80%;
+  height:20%;
+  border:3px solid white;
+  font-size:1.6em;
+}
 #HzBarC {
   width:1200px;
   height:400px;
 }
 
-
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	    -webkit-appearance: none;
+	        margin: 0;
+	}
