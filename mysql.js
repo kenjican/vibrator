@@ -42,7 +42,7 @@ app.get('/insert/:sts',(req,res)=>{
   }); 
   //console.log(sql);
   res.send('ok');
-  res.end();
+  //res.end();
 });
 
 app.get('/getHis/:fDate/:tDate',(req,res)=>{

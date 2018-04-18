@@ -19,21 +19,26 @@ const insSql = function() {
 const noinsSql = function() {};
 let swtchSql = noinsSql;
 
-const getPSS = function() {
+
+let getPSS = function() {
   setQ(VFDB.cmdASCII.getPSS);
-  swtchLoga();
-  //setTimeout(()=>setQ(VFDB.cmdASCII.getPSS),300);
+  swtchs();
 };
+
 /*
-const pssLoga = function(){
-                 setQ(VFDB.cmdASCII.getPSS);
-                 console.log("pss Loga get called");
-                 //http.get('http://localhost:8888/getPSS',(res)=>{});
-                 runLoga();
-               };
+const swtchLoga = function() {
+  setQ(VFDB.cmdASCII.getPSS);
+  runLoga();
+};
+
+const swtchLinear = function() {
+  setQ(VFDB.cmdASCII.getPSS);
+  runLinear();
+};
 */
-let swtchLoga = noinsSql;
-//let swtchLoga = pssLoga;
+
+
+let swtchs = noinsSql;
 
 
 
@@ -64,12 +69,7 @@ parser.on('data', function(data) {
       swtchSql();
       chkQ();
       break;
-      //   case :
-      //     console.log(data);
-      //    break;
-
     default:
-      //console.log(data);
       chkQ();
       break;
 
@@ -80,12 +80,12 @@ parser.on('data', function(data) {
 U1.on('error', (err) => console.log(err));
 
 function setQ(cmd) {
-  if (VFDB.cmdASCII.Mutex){
+  if (VFDB.cmdASCII.Mutex) {
     VFDB.cmdASCII.Mutex = false;
     U1.write(cmd);
   } else {
     VFDB.cmdASCII.Que.push(cmd);
-    if (VFDB.cmdASCII.Que.length > 2){
+    if (VFDB.cmdASCII.Que.length > 2) {
       VFDB.cmdASCII.Mutex = true;
       VFDB.cmdASCII.QUE = [];
     }
@@ -114,15 +114,9 @@ function LRCchk(cmd) {
 }
 
 
-
-
-
-
 /*
 Steps logic and function
 */
-//let Stps = VFDB.stps.mltLvl;
-//let loopStps = VFDB.stps.loop;
 
 function runStps() {
   if (VFDB.stps.lvlPointer == VFDB.stps.mltLvl.length) {
@@ -133,40 +127,32 @@ function runStps() {
     } else {
       console.log('end');
       setQ(VFDB.cmdASCII.stop);
-      setTimeout(() => setQ(VFDB.cmdASCII.setZero, 5000));
+      setSV(0);
+      clearTimeout(t2);
       return;
     }
   }
   setSV(VFDB.stps.mltLvl[VFDB.stps.lvlPointer][0]);
-  setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 1000);
+  t2 = setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 1000);
   VFDB.stps.lvlPointer += 1;
 }
 
 /*
 Logarithm logic and function
 */
-VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
-VFDB.lgrm.loop *= 2;
 
 function runLoga() {
-  //setQ(VFDB.cmdASCII.getPSS);
   let SV = 10 ** (VFDB.lgrm.log10 / VFDB.lgrm.tm * VFDB.lgrm.lcount) + VFDB.lgrm.strt;
   console.log(SV);
   setSV(SV);
-  //SV2hex = parseInt(SV2hex * 100).toString(16).padStart(4,'0').toUpperCase();
-  //let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1,) + SV2hex);
-  //let sSV = VFDB.cmdASCII.setSV + SV2hex + LRC + '\r\n';
-  //sSV = sSV.toUpperCase();
-  //console.log(sSV);
-  //setQ(sSV);
-  //http.get('http://localhost:8888/setSV/' + SV2hex.toFixed(2),(res)=>{});
   if ((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)) {
     console.log('get if');
     VFDB.lgrm.loop -= 1;
     if (VFDB.lgrm.loop == 0) {
-      swtchLoga = noinsSql;
+      swtchs = noinsSql;
       swtchSql = noinsSql;
       setQ(VFDB.cmdASCII.stop);
+      setSV(0);
       return;
     }
     VFDB.lgrm.drc = VFDB.lgrm.drc - (VFDB.lgrm.drc * 2);
@@ -180,48 +166,31 @@ function setSV(sv) {
   let SV2hex = (parseInt(sv * 100)).toString(16).padStart(4, '0');
   let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1, ) + SV2hex);
   let sSV = (VFDB.cmdASCII.setSV + SV2hex + LRC).toUpperCase() + '\r\n';
-  //sSV = sSV.toUpperCase();
   console.log(sSV);
   setQ(sSV);
 }
 
-VFDB.linear.loop *= 2;
 
-function runLinear(){
-  if(VFDB.linear.lcount == VFDB.linear.tm){
+function runLinear() {
+  if (VFDB.linear.lcount == VFDB.linear.tm) {
     VFDB.linear.loop -= 1;
     VFDB.linear.Arith *= -1;
-    if(VFDB.linear.loop ==0){
+    if (VFDB.linear.loop == 0) {
       swtchSql = noinsSql;
-      swtchLoga = noinsSql;
+      swtchs = noinsSql;
       setQ(VFDB.cmdASCII.stop);
+      setSV(0);
       return;
     }
     VFDB.linear.lcount = 0;
-    if(VFDB.linear.loop % 2 != 0){
+    if (VFDB.linear.loop % 2 != 0) {
       VFDB.linear.rstrt = VFDB.linear.end;
-    }else{
+    } else {
       VFDB.linear.rstrt = VFDB.linear.strt;
     }
   }
-/*     
-  //setSV(VFDB.linear.nowSV);
-  console.log(VFDB.linear.nSV);
-  if(VFDB.linear.lcount > VFDB.linear.tm){
-    VFDB.linear.lcount = 0;
-    VFDB.linear.Arith *= -1;
-    VFDB.linear.loop -= 1; 
-    if(VFDB.linear.loop ==0){
-      swtchLoga = noinsSql;
-      swtchSql = noinsSql;
-      setQ(VFDB.cmdASCII.stop);
-      return;
-    }
-  }	  
-*/
- //setSV(VFDB.linear.Arith * VFDB.linear.lcount + VFDB.linear.rstrt) ; 
- setSV(VFDB.linear.Arith * VFDB.linear.lcount + VFDB.linear.rstrt) ; 
- VFDB.linear.lcount +=1;
+  setSV(VFDB.linear.Arith * VFDB.linear.lcount + VFDB.linear.rstrt);
+  VFDB.linear.lcount += 1;
 }
 
 
@@ -234,14 +203,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-/*
-app.use((req,res,next)=>{
-  res.header("Access-Control-Allow-Origin","*");
-  res.header("Access-Control-Allow-Headers","Origin,X-Request-With,Content-Type,Accept");
-  next();
-});
 
-*/
 app.get('/', function(req, res) {
   res.sendFile('/home/kenji/vibrator/index.htm');
 });
@@ -255,8 +217,10 @@ app.get('/run', function(req, res) {
 
 app.get('/stop', function(req, res) {
   swtchSql = noinsSql;
-  swtchLoga = noinsSql;
+  swtchs = noinsSql;
   setQ(VFDB.cmdASCII.stop);
+  setSV(0);
+  clearTimeout(t2);
   res.send('stop sent');
   res.end;
 });
@@ -272,14 +236,6 @@ app.get('/getPSS', function(req, res) {
 });
 
 app.get('/setSV/:SV', function(req, res) {
-  /*
-    let SV2hex = (parseFloat(req.params.SV)*100).toString(16).padStart(4,'0');
-    let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1,) + SV2hex);
-    let sSV = VFDB.cmdASCII.setSV + SV2hex + LRC + '\r\n';
-    sSV = sSV.toUpperCase();
-    //console.log(sSV);
-    setQ(sSV);
-  */
   setSV(req.params.SV);
   res.send('ok');
   res.end;
@@ -293,44 +249,35 @@ app.get('/test/:cmd', function(req, res) {
 });
 
 app.get('/stps', function(req, res) {
-  //setQ(VFDB.cmdASCII.setZero);
   VFDB.stps.lvlPointer = 0;
   swtchSql = insSql;
-  //U1.drain(()=>setQ(VFDB.cmdASCII.run));
   setTimeout(() => setQ(VFDB.cmdASCII.run), 300);
   runStps();
-  //  setQ(VFDB.cmdASCII.run);
-
   res.send('step running');
   res.end;
 });
 
 app.get('/runLoga', function(req, res) {
   swtchSql = insSql;
-  swtchLoga = runLoga;
+  swtchs = runLoga;
+  VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
+  VFDB.lgrm.loop *= 2;
   res.send('ok');
-  setTimeout(() => setQ(VFDB.cmdASCII.run), 500);
+  setQ(VFDB.cmdASCII.run);
   res.end;
 });
 
 
-app.get('/runLinear',(req,res)=>{
-  swtchSql =insSql;
-  swtchLoga = runLinear;
+app.get('/runLinear', (req, res) => {
+  swtchSql = insSql;
+  swtchs = runLinear;
   VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
+  VFDB.linear.loop *= 2;
   res.send('ok');
   VFDB.linear.rstrt = VFDB.linear.strt;
-  setTimeout(()=>setQ(VFDB.cmdASCII.run),500);
+  setQ(VFDB.cmdASCII.run);
   res.end;
 });
-
-function getLocalPSS() {
-  http.get('http://localhost:8888/getPSS', (res) => {
-    //console.log(res);
-  });
-}
-
-
 
 
 app.listen(8888);
@@ -340,11 +287,9 @@ app.listen(8888);
 Timer
 */
 
-
 let t1 = setInterval(getPSS, 1000);
-//let t1 = setInterval(swtchLoga,1000);
-//let t1 = setInterval(()=>pssLoga,1000);
 
+let t2; //t2 for steps setTimeout
 /*
 WebSocket
 */
