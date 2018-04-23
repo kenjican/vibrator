@@ -3,14 +3,16 @@
 <meta charset="utf-8">
 <meta lang="zh">
 <link rel="stylesheet" href="./client/bootstrap.min.css">
-<link rel="stylesheet" href="./client/VFDB.css">
+<link id="sheet" rel="stylesheet" href="./client/dark.css">
 <link rel="stylesheet" href="./client/style.css">
 <script src="./client/jquery-3.3.1.min.js"></script>
 <script src="./client/popper.js"></script>
-<script src="./client/bootstrap.js"></script>
+<script src="./client/bootstrap.min.js"></script>
 <script src="./client/echarts.min.js"></script>
 <script src="./client/Ecalendar.jquery.min.js"></script>
 <script src="./client/VFDB.js"></script>
+<script src="./client/mindmup-editabletable.js"></script>
+<script src="./client/number-input.js"></script>
 </head>
 <body>
 <div id="HzBarC"></div>
@@ -18,7 +20,53 @@
 	<tr><td>目前频率</td><td>规定振幅Z</td><td>测试时间</td><td>剩余时间</td><td>扫频时间</td><td>扫频次数</td><td>起始频率</td><td>终止频率</td><td>目前阶数</td></tr>
 	<tr><td><label id="HzSV">0</label></td><td>2mm</td><td>15HR</td><td>5Hr</td><td>3HR</td><td>20</td><td>10</td><td>55</td><td>5</td></tr>
 </table>
-<label id="HzPV">0</label>
+
+<select id="ssS">
+ <option value="./client/dark.css">灰阶</option>
+ <option value="./client/light.css">白底</option>
+ <option value="./client/tech.css">荧光</option>
+ <option value="./client/blue.css">蓝色</option>
+ <option value="./client/rose.css">红色</option>
+</select>
+<div id="ctrlBtn" class="float-right">
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rptModal">报表</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confModal">设定</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#opModal">操作</button>
+</div>
+<div class="modal fade in" id="confModal" tabindex="-1" role="dialog" aria-labelledby="confModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5><div class="alert alert-error hide">上限是100</div></h5> </div>
+  <div class="modal-body">
+    <table id="mmtable">
+  <thead>
+    <tr>
+      <th>阶数</th>
+      <th>HZ</th>
+      <th>时</th>
+      <th>分</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  </tbody>
+  <tfoot><tr><th>总时长</th><th></th><th></th><th></th></tr></tfoot>
+</table>
+<label>循环次数</label><input type="number" value="1" min="1" max="100" id="stpsloop">
+  </div>
+  <div class="modal-footer">
+  <button type="button" class="btn btn-primary" id="dRow">删除</button>
+<button type="button" class="btn btn-primary" id="aRow">新增</button>
+<button type="button" class="btn btn-primary" id="updt">更新</button>
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+  </div></div>
+  </div></div></div>
+<div class="modal fade in" id="opModal" tabindex="-1" role="dialog" aria-labelledby="opModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header"><h5>put the paginaton herer</h5> </div>
+  <div class="modal-body">
+ <label id="HzPV">0</label>
 <label id="HzSV">0</label>
 
 <label id="HzSts">HzSts</label>
@@ -31,8 +79,8 @@
 <button type="button" id="stpup">递增</button>
 <button type="button" value="设频率" id="setSV" class="setB">setSV</button>
 <label class="opL"><input type="radio" name="opMode" value="/run" checked="checked">定频</input></label>
-<label class="opL"><input type="radio" name="opMode" value="/runLoga">对数扫频</input></label>
-<label class="opL"><input type="radio" name="opMode" value="/runLinear">线性扫频</input></label>
+<label class="opL"><input type="radio" name="opMode" value="/runLoga">对数</input></label>
+<label class="opL"><input type="radio" name="opMode" value="/runLinear">线性</input></label>
 <label class="opL"><input type="radio" name="opMode" value="/stps">多阶</input></label>
 </div>
 <div class="calendarWarp">
@@ -40,6 +88,12 @@
 <input type="text" name="tdate" class="ECalendar" id="tEC">
 <input type="button" value="历史曲线" id="getHisB"></input>
 </div>
-</body>
+
+  </div>
+  <div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+  </div></div>
+  </div></div></div>
+  </body>
 </html>
 

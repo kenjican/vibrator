@@ -47,7 +47,7 @@ app.get('/insert/:sts',(req,res)=>{
 
 app.get('/getHis/:fDate/:tDate',(req,res)=>{
   let sql = `select DateTime,PV,SV from Apr04 where DateTime between '${req.params.fDate}' and '${req.params.tDate}' and (id mod 5 = 0)`; 
-  console.log(sql);
+  //console.log(sql);
   con.query(sql,(err,result,fields)=>{
     if(err) throw err;
     //console.log(result);

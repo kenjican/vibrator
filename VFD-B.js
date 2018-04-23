@@ -1,6 +1,6 @@
 "use strict";
 const fs = require('fs');
-const VFDB = JSON.parse(fs.readFileSync('./VFD-B.json'));
+const VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json'));
 const bodyParser = require('body-parser');
 const WebSocketServer = require('ws').Server;
 const SP = require('serialport');
@@ -123,9 +123,9 @@ function runStps() {
     VFDB.stps.loopPointer += 1;
     if (VFDB.stps.loopPointer != VFDB.stps.loop) {
       VFDB.stps.lvlPointer = 0;
-      console.log(VFDB.stps.loopPointer);
+      //console.log(VFDB.stps.loopPointer);
     } else {
-      console.log('end');
+      //console.log('end');
       setQ(VFDB.cmdASCII.stop);
       setSV(0);
       clearTimeout(t2);
@@ -133,7 +133,7 @@ function runStps() {
     }
   }
   setSV(VFDB.stps.mltLvl[VFDB.stps.lvlPointer][0]);
-  t2 = setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 1000);
+  t2 = setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 60000);
   VFDB.stps.lvlPointer += 1;
 }
 
@@ -143,10 +143,10 @@ Logarithm logic and function
 
 function runLoga() {
   let SV = 10 ** (VFDB.lgrm.log10 / VFDB.lgrm.tm * VFDB.lgrm.lcount) + VFDB.lgrm.strt;
-  console.log(SV);
+  //console.log(SV);
   setSV(SV);
   if ((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)) {
-    console.log('get if');
+    //console.log('get if');
     VFDB.lgrm.loop -= 1;
     if (VFDB.lgrm.loop == 0) {
       swtchs = noinsSql;
@@ -159,14 +159,14 @@ function runLoga() {
   }
 
   VFDB.lgrm.lcount += VFDB.lgrm.drc;
-  console.log(VFDB.lgrm.lcount);
+  //console.log(VFDB.lgrm.lcount);
 }
 
 function setSV(sv) {
   let SV2hex = (parseInt(sv * 100)).toString(16).padStart(4, '0');
   let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1, ) + SV2hex);
   let sSV = (VFDB.cmdASCII.setSV + SV2hex + LRC).toUpperCase() + '\r\n';
-  console.log(sSV);
+  //console.log(sSV);
   setQ(sSV);
 }
 
@@ -279,6 +279,13 @@ app.get('/runLinear', (req, res) => {
   res.end;
 });
 
+app.post('/saveConf',(req,res)=>{
+  console.log(JSON.stringify(req.body));
+  let data = JSON.stringify(req.body);
+  fs.writeFile('./client/VFD-B.json',data,'utf8',(cb)=>{});
+  res.send('ok');
+  res.end;
+});
 
 app.listen(8888);
 

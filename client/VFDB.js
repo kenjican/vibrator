@@ -6,6 +6,7 @@ let t1 = 0;
 let DT = [],
   PV = [],
   SV = [];
+let testD;
 xmlhttp.onreadystatechange = function() {
   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
     console.log(xmlhttp.response);
@@ -134,6 +135,11 @@ $(function() {
   });
 });
 $(document).ready(function() {
+
+
+
+
+
   $('#runB').bind('click', function() {
     xmlhttp.open("GET", $('input[name=opMode]:checked').val(), true);
     xmlhttp.responseType = 'text';
@@ -201,6 +207,61 @@ $(document).ready(function() {
   $('#stpdown').click(()=>{
     $('#062001')[0].stepDown(5);
     $('#setSV').click();
+  });
+let a = document.getElementById('mmtable');
+$.getJSON('./client/VFD-B.json',(data)=>{
+ testD = data;
+ for(let i=0;i<testD.stps.mltLvl.length;i++){
+  a.children[1].insertAdjacentHTML('beforeEnd','<tr><th>' + (a.children[1].children.length + 1) +'</th><td></td><td></td><td></td></tr>');
+  a.children[1].children[i].children[1].innerText = testD.stps.mltLvl[i][0];
+  a.children[1].children[i].children[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
+  a.children[1].children[i].children[3].innerText = testD.stps.mltLvl[i][1] % 60;
+}
+$('#stpsloop').val(testD.stps.loop);
+    $('#mmtable').editableTableWidget();
+ $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
+});
+
+
+$('#aRow').click(()=>{
+    a.children[1].insertAdjacentHTML('beforeEnd','<tr><th>' + (a.children[1].children.length + 1) +'</th><td></td><td></td><td></td></tr>');
+    $('#mmtable').editableTableWidget();
+});
+
+$('#dRow').click(()=>{
+   a.children[1].lastChild.remove();
+   return false;
+});
+
+$('#updt').click(()=>{
+let y = [];
+
+for(let i =0;i<a.children[1].children.length;i++){
+  let x = [];
+  let t;
+  x.push(parseInt(a.children[1].children[i].children[1].innerText));
+  t = parseInt(a.children[1].children[i].children[2].innerText * 60) + parseInt(a.children[1].children[i].children[3].innerText);
+  x.push(t);
+  y.push(x);
+}
+  console.log(y);
+  testD.stps.mltLvl = y;
+  testD.stps.loop = parseInt($('#stpsloop').val());
+  let data = JSON.stringify(testD);
+  xmlhttp.open("POST","/saveConf",true);
+  xmlhttp.setRequestHeader("Content-type","application/json");
+  xmlhttp.send(data);
+/*
+  $.post('/saveConf',(testD,status)=>{
+     console.log(status);
+  },'json');
+*/
+});
+
+
+
+  $("#ssS").change(()=>{
+    $("#sheet").attr("href",$("#ssS").val());
   });
 
 

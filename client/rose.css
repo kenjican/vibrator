@@ -1,5 +1,9 @@
+/*
+红色 
+ 
+ */
 body{
-  background-color:#000000;
+  background-color:#cb8686;
 
 }
 /*
@@ -18,19 +22,21 @@ button{
   border-radius:50%;
   height:50px;
   width:50px;
+
 }
 
 .opL{
   font-size:1.8em;
-  color:#ffaf51;
+  color:#707070;
 }
 
 #dashboard,#mmtable{
   margin:0 auto;
   width:80%;
   height:20%;
-  border:3px solid white;
+  border:3px solid #B0B0B0;
   font-size:1.6em;
+  color:#550000;
 }
 #HzBarC {
   width:1200px;
@@ -43,6 +49,10 @@ input[type=number]::-webkit-outer-spin-button {
 	        margin: 0;
 	}
 .modal-content{
-  background-color:#fff;
+  background-color:#B0B0B0;
   opacity:0.7;
+}
+
+#ctrlboard{
+  
 }
