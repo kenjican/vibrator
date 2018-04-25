@@ -7,7 +7,7 @@ let DT = [],
   PV = [],
   SV = [];
 let testD;
-xmlhttp.onreadystatechange = function() {
+xmlhttp.onreadystatechange = function () {
   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
     console.log(xmlhttp.response);
   }
@@ -17,11 +17,12 @@ function rcws() {
 
   socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
 
-  socket.onmessage = function(msg) {
+  socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
     $("#SDT").text(a.DT);
     $("#HzPV").text(a.PV);
     $("#HzSV").text(a.SV);
+    $('#dashboard tbody tr')[0].children[0].innerText = a.SV;
     $("#HzSts").text(a.stts);
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
       DT.push(a.DT);
@@ -32,16 +33,16 @@ function rcws() {
           data: DT
         },
         series: [{
-            name: 'PV',
-	    type: 'line',
-            data: PV
-          },
-          {
-            name: 'SV',
-	    type: 'line',
-	    step: 'middle',
-            data: SV
-          }
+          name: 'PV',
+          type: 'line',
+          data: PV
+        },
+        {
+          name: 'SV',
+          type: 'line',
+          step: 'middle',
+          data: SV
+        }
         ]
       });
     }
@@ -95,16 +96,16 @@ function parseHis(result) {
       data: DT
     },
     series: [{
-        name: 'PV',
-	type: 'line',
-        data: PV
-      },
-      {
-        name: 'SV',
-	type: 'line',
-	step: 'middle',
-        data: SV
-      }
+      name: 'PV',
+      type: 'line',
+      data: PV
+    },
+    {
+      name: 'SV',
+      type: 'line',
+      step: 'middle',
+      data: SV
+    }
     ]
   });
 }
@@ -116,7 +117,7 @@ $.getJSON('./client/VFDBcmd.json', (data) => {
   VFDBcmd = data;
 });
 
-$(function() {
+$(function () {
   $("#fEC").ECalendar({
     type: "time",
     //stamp:false,
@@ -134,19 +135,19 @@ $(function() {
     step: 10
   });
 });
-$(document).ready(function() {
+$(document).ready(function () {
 
 
 
 
 
-  $('#runB').bind('click', function() {
+  $('#runB').bind('click', function () {
     xmlhttp.open("GET", $('input[name=opMode]:checked').val(), true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
   });
 
-  $('#testB').bind('click', function() {
+  $('#testB').bind('click', function () {
     let a = LRCchk($('#test').val());
     console.log(a);
     xmlhttp.open("GET", '/test/:' + $('#test').val() + a, true);
@@ -155,7 +156,7 @@ $(document).ready(function() {
   });
 
 
-  $('#stopB').bind('click', function() {
+  $('#stopB').bind('click', function () {
     xmlhttp.open("GET", '/stop', true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
@@ -175,7 +176,7 @@ $(document).ready(function() {
     });
   });
 
-  $('.setB').bind('click', function() {
+  $('.setB').bind('click', function () {
     let v = parseInt($('#' + VFDBcmd[this.id][0]).val()) * VFDBcmd[this.id][1];
     v = v.toString(16).padStart(4, '0');
     let cmd = VFDBcmd.MNo + VFDBcmd[this.id][0] + v.toUpperCase();
@@ -191,7 +192,7 @@ $(document).ready(function() {
     */
   });
 
-  $('#setHzTxt').keyup(function(event) {
+  $('#setHzTxt').keyup(function (event) {
     if (event.keyCode === 13) {
       xmlhttp.open("GET", '/setHz/' + $('#setHzTxt').val(), true);
       xmlhttp.responseType = 'text';
@@ -199,69 +200,94 @@ $(document).ready(function() {
     }
   });
 
-  $('#stpup').click(()=>{
+  $('#stpup').click(() => {
     $('#062001')[0].stepUp(5);
     $('#setSV').click();
   });
 
-  $('#stpdown').click(()=>{
+  $('#stpdown').click(() => {
     $('#062001')[0].stepDown(5);
     $('#setSV').click();
   });
-let a = document.getElementById('mmtable');
-$.getJSON('./client/VFD-B.json',(data)=>{
- testD = data;
- for(let i=0;i<testD.stps.mltLvl.length;i++){
-  a.children[1].insertAdjacentHTML('beforeEnd','<tr><th>' + (a.children[1].children.length + 1) +'</th><td></td><td></td><td></td></tr>');
-  a.children[1].children[i].children[1].innerText = testD.stps.mltLvl[i][0];
-  a.children[1].children[i].children[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
-  a.children[1].children[i].children[3].innerText = testD.stps.mltLvl[i][1] % 60;
-}
-$('#stpsloop').val(testD.stps.loop);
+  
+  $.getJSON('./client/VFD-B.json', (data) => {
+    let a = document.getElementById('mmtable');
+    testD = data;
+    for (let i = 0; i < testD.stps.mltLvl.length; i++) {
+      a.children[1].insertAdjacentHTML('beforeEnd', '<tr><th>' + (a.children[1].children.length + 1) + '</th><td></td><td></td><td></td></tr>');
+      a.children[1].children[i].children[1].innerText = testD.stps.mltLvl[i][0];
+      a.children[1].children[i].children[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
+      a.children[1].children[i].children[3].innerText = testD.stps.mltLvl[i][1] % 60;
+    }
+    $('#stpsloop').val(testD.stps.loop);
     $('#mmtable').editableTableWidget();
- $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
-});
+    $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
+
+    a = document.getElementById('linear-table');
+
+    a.children[1].children[0].children[0].innerText = testD.linear.strt;
+    a.children[1].children[0].children[1].innerText = testD.linear.end;
+    a.children[1].children[0].children[2].innerText = testD.linear.loop;
+    a.children[1].children[0].children[3].innerText = testD.linear.tm;
+    $('#linear-table').editableTableWidget();
+    a = document.getElementById('log-table');
+    a.children[1].children[0].children[0].innerText = testD.lgrm.strt;
+    a.children[1].children[0].children[1].innerText = testD.lgrm.span + testD.lgrm.strt;
+    a.children[1].children[0].children[2].innerText = testD.lgrm.loop;
+    a.children[1].children[0].children[3].innerText = testD.lgrm.tm;
+    $('#log-table').editableTableWidget();
+    
+  });
 
 
-$('#aRow').click(()=>{
-    a.children[1].insertAdjacentHTML('beforeEnd','<tr><th>' + (a.children[1].children.length + 1) +'</th><td></td><td></td><td></td></tr>');
-    $('#mmtable').editableTableWidget();
-});
+  $('#aRow').click(() => {
+    $("#mmtable tbody tr:last").after('<tr><th>' + ($("#mmtable tbody tr").length + 1) + '</th><td>0</td><td>0</td><td>0</td></tr>');
+    $('#mmtable').editableTableWidget().numericInputExample();
+  });
 
-$('#dRow').click(()=>{
-   a.children[1].lastChild.remove();
-   return false;
-});
+  $('#dRow').click(() => {
+    $('#mmtable tbody tr:last').remove();
+    $('#mmtable').editableTableWidget().numericInputExample();
+    return false;
+  });
 
-$('#updt').click(()=>{
-let y = [];
+  $('#updt').click(() => {
+    let y = [];
 
-for(let i =0;i<a.children[1].children.length;i++){
-  let x = [];
-  let t;
-  x.push(parseInt(a.children[1].children[i].children[1].innerText));
-  t = parseInt(a.children[1].children[i].children[2].innerText * 60) + parseInt(a.children[1].children[i].children[3].innerText);
-  x.push(t);
-  y.push(x);
-}
-  console.log(y);
-  testD.stps.mltLvl = y;
-  testD.stps.loop = parseInt($('#stpsloop').val());
-  let data = JSON.stringify(testD);
-  xmlhttp.open("POST","/saveConf",true);
-  xmlhttp.setRequestHeader("Content-type","application/json");
-  xmlhttp.send(data);
-/*
-  $.post('/saveConf',(testD,status)=>{
-     console.log(status);
-  },'json');
-*/
-});
+    for (let i = 0; i < $('#mmtable tbody tr').length; i++) {
+      let x = [];
+      let t;
+      x.push(parseInt($('#mmtable tbody tr')[i].children[1].innerText));
+      t = parseInt($('#mmtable tbody tr')[i].children[2].innerText * 60) + parseInt($('#mmtable tbody tr')[i].children[3].innerText);
+      x.push(t);
+      y.push(x);
+    }
+    console.log(y);
+    testD.stps.mltLvl = y;
+    testD.stps.loop = parseInt($('#stpsloop').val());
+    testD.lgrm.strt = parseInt($('#log-table tbody tr')[0].children[0].innerText);
+    testD.lgrm.span = Math.abs(parseInt($('#log-table tbody tr')[0].children[0].innerText - $('#log-table tbody tr')[0].children[1].innerText));
+    testD.lgrm.loop = parseInt($('#log-table tbody tr')[0].children[2].innerText);
+    testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText);
+    testD.linear.strt = parseInt($('#linear-table tbody tr')[0].children[0].innerText);
+    testD.linear.end = parseInt($('#linear-table tbody tr')[0].children[1].innerText);
+    testD.linear.loop = parseInt($('#linear-table tbody tr')[0].children[2].innerText);
+    testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText);
+    let data = JSON.stringify(testD);
+    xmlhttp.open("POST", "/saveConf", true);
+    xmlhttp.setRequestHeader("Content-type", "application/json");
+    xmlhttp.send(data);
+    /*
+      $.post('/saveConf',(testD,status)=>{
+         console.log(status);
+      },'json');
+    */
+  });
 
 
 
-  $("#ssS").change(()=>{
-    $("#sheet").attr("href",$("#ssS").val());
+  $("#ssS").change(() => {
+    $("#sheet").attr("href", $("#ssS").val());
   });
 
 
@@ -287,23 +313,23 @@ for(let i =0;i<a.children[1].children.length;i++){
       }
     },
     dataZoom: [{
-        type: 'slider',
-        xAxisIndex: 0,
-        start: 0,
-        end: 100
-      },
-      {
-        type: 'slider',
-        yAxisIndex: 0,
-        filterMode: 'empty',
-        start: 0,
-        end: 100
-      },
-      {
-        type: 'inside',
-        yAxisIndex: 0,
-        filterMode: 'empty'
-      }
+      type: 'slider',
+      xAxisIndex: 0,
+      start: 0,
+      end: 100
+    },
+    {
+      type: 'slider',
+      yAxisIndex: 0,
+      filterMode: 'empty',
+      start: 0,
+      end: 100
+    },
+    {
+      type: 'inside',
+      yAxisIndex: 0,
+      filterMode: 'empty'
+    }
     ],
 
     xAxis: {
@@ -318,27 +344,40 @@ for(let i =0;i<a.children[1].children.length;i++){
       position: 'left',
       axisLabel: {
         formatter: '{value} Hz',
-	textStyle:{
-	  color:'#fbafaf'
-	}
+        textStyle: {
+          color: '#fbafaf'
+        }
       }
     }],
     series: [{
-        name: 'PV',
-        type: 'line',
-        data: []
+      name: 'PV',
+      type: 'line',
+      data: []
+    },
+    {
+      name: 'SV',
+      type: 'line',
+      step: 'middle',
+      itemStyle: {
+        normal: {
+          color: "#ff715e"
+        }
       },
-      {
-        name: 'SV',
-        type: 'line',
-        step: 'middle',
-	itemStyle:{
-	  normal:{
-	    color:"#ff715e"
-          }
-        },
-        data: []
-      }
+      data: []
+    }
     ]
   });
+
+/*
+modal draggable
+*/
+
+$('#opModal').draggable({
+  handle:".modal-header"
+})
+
+$('#confModal').draggable({
+  handle:".modal-header"
+})
+
 });

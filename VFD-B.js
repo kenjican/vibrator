@@ -129,6 +129,8 @@ function runStps() {
       setQ(VFDB.cmdASCII.stop);
       setSV(0);
       clearTimeout(t2);
+      let sql = 'update schedule set endTime=NULL order by id desc limit 1';
+      http.get('http://localhost:8889/sql/' + sql , (res) => {});
       return;
     }
   }
@@ -211,6 +213,8 @@ app.get('/', function(req, res) {
 app.get('/run', function(req, res) {
   swtchSql = insSql;
   setQ(VFDB.cmdASCII.run);
+  let sql = 'insert into schedule (expName) values ("test")';
+  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
   res.send('run sent');
   res.end;
 });
@@ -221,6 +225,8 @@ app.get('/stop', function(req, res) {
   setQ(VFDB.cmdASCII.stop);
   setSV(0);
   clearTimeout(t2);
+  let sql = 'update schedule set endTime=NULL order by id desc limit 1';
+  http.get('http://localhost:8889/sql/' + sql , (res) => {});
   res.send('stop sent');
   res.end;
 });
@@ -253,6 +259,8 @@ app.get('/stps', function(req, res) {
   swtchSql = insSql;
   setTimeout(() => setQ(VFDB.cmdASCII.run), 300);
   runStps();
+  let sql = 'insert into schedule (expName) values ("test")';
+  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
   res.send('step running');
   res.end;
 });

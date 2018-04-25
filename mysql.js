@@ -57,6 +57,15 @@ app.get('/getHis/:fDate/:tDate',(req,res)=>{
 
 });
 
+app.get('/sql/:cmd',(req,res)=>{
+  //let sql = `insert into schedule (${req.params.cmd}) values (NULL)`;
+  console.log(req.params.cmd);
+  con.query(req.params.cmd,(err,result)=>{
+    if(err) throw err;
+  });
+  res.send('ok');
+});
+
 app.get('/',(req,res)=>{
   res.send('OF');
   res.end;
