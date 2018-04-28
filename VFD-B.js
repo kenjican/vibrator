@@ -1,6 +1,6 @@
 "use strict";
 const fs = require('fs');
-const VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json'));
+let VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json'));
 const bodyParser = require('body-parser');
 const WebSocketServer = require('ws').Server;
 const SP = require('serialport');
@@ -21,27 +21,11 @@ let swtchSql = noinsSql;
 
 
 let getPSS = function() {
-  setQ(VFDB.cmdASCII.getPSS);
   swtchs();
-};
-
-/*
-const swtchLoga = function() {
   setQ(VFDB.cmdASCII.getPSS);
-  runLoga();
 };
-
-const swtchLinear = function() {
-  setQ(VFDB.cmdASCII.getPSS);
-  runLinear();
-};
-*/
-
 
 let swtchs = noinsSql;
-
-
-
 
 /*
 Set up serial port
@@ -115,7 +99,7 @@ function LRCchk(cmd) {
 
 
 /*
-Steps logic and function
+Steps logic and functions
 */
 
 function runStps() {
@@ -123,9 +107,7 @@ function runStps() {
     VFDB.stps.loopPointer += 1;
     if (VFDB.stps.loopPointer != VFDB.stps.loop) {
       VFDB.stps.lvlPointer = 0;
-      //console.log(VFDB.stps.loopPointer);
     } else {
-      //console.log('end');
       setQ(VFDB.cmdASCII.stop);
       setSV(0);
       clearTimeout(t2);
@@ -145,10 +127,8 @@ Logarithm logic and function
 
 function runLoga() {
   let SV = 10 ** (VFDB.lgrm.log10 / VFDB.lgrm.tm * VFDB.lgrm.lcount) + VFDB.lgrm.strt;
-  //console.log(SV);
   setSV(SV);
   if ((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)) {
-    //console.log('get if');
     VFDB.lgrm.loop -= 1;
     if (VFDB.lgrm.loop == 0) {
       swtchs = noinsSql;
@@ -161,14 +141,12 @@ function runLoga() {
   }
 
   VFDB.lgrm.lcount += VFDB.lgrm.drc;
-  //console.log(VFDB.lgrm.lcount);
 }
 
 function setSV(sv) {
   let SV2hex = (parseInt(sv * 100)).toString(16).padStart(4, '0');
   let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1, ) + SV2hex);
   let sSV = (VFDB.cmdASCII.setSV + SV2hex + LRC).toUpperCase() + '\r\n';
-  //console.log(sSV);
   setQ(sSV);
 }
 
@@ -195,6 +173,25 @@ function runLinear() {
   VFDB.linear.lcount += 1;
 }
 
+function run(){
+  swtchSql = insSql;
+  setQ(VFDB.cmdASCII.run);
+  let sql = 'insert into schedule (expName) values ("test")';
+  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
+
+}
+
+function stop(){
+  swtchSql = noinsSql;
+  swtchs = noinsSql;
+  setQ(VFDB.cmdASCII.stop);
+  setSV(0);
+  clearTimeout(t2);
+  let sql = 'update schedule set endTime=NULL order by id desc limit 1';
+  http.get('http://localhost:8889/sql/' + sql , (res) => {});
+
+
+}
 
 /*
 Web
@@ -211,34 +208,19 @@ app.get('/', function(req, res) {
 });
 
 app.get('/run', function(req, res) {
-  swtchSql = insSql;
-  setQ(VFDB.cmdASCII.run);
-  let sql = 'insert into schedule (expName) values ("test")';
-  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
+  run();
   res.send('run sent');
   res.end;
 });
 
 app.get('/stop', function(req, res) {
-  swtchSql = noinsSql;
-  swtchs = noinsSql;
-  setQ(VFDB.cmdASCII.stop);
-  setSV(0);
-  clearTimeout(t2);
-  let sql = 'update schedule set endTime=NULL order by id desc limit 1';
-  http.get('http://localhost:8889/sql/' + sql , (res) => {});
+  stop();
   res.send('stop sent');
   res.end;
 });
 
 app.get('/getPV', function(req, res) {
   setQ(VFDB.cmdASCII.getPV);
-});
-
-app.get('/getPSS', function(req, res) {
-  setQ(VFDB.cmdASCII.getPSS);
-  res.send("ok");
-  res.end;
 });
 
 app.get('/setSV/:SV', function(req, res) {
@@ -248,7 +230,6 @@ app.get('/setSV/:SV', function(req, res) {
 });
 
 app.get('/test/:cmd', function(req, res) {
-  console.log(req.params.cmd);
   setQ(':' + req.params.cmd + '\r\n');
   res.send(req.params.cmd);
   res.end;
@@ -256,41 +237,37 @@ app.get('/test/:cmd', function(req, res) {
 
 app.get('/stps', function(req, res) {
   VFDB.stps.lvlPointer = 0;
-  swtchSql = insSql;
-  setTimeout(() => setQ(VFDB.cmdASCII.run), 300);
+  run();
   runStps();
-  let sql = 'insert into schedule (expName) values ("test")';
-  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
   res.send('step running');
   res.end;
 });
 
 app.get('/runLoga', function(req, res) {
-  swtchSql = insSql;
   swtchs = runLoga;
   VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
   VFDB.lgrm.loop *= 2;
+  run();
   res.send('ok');
-  setQ(VFDB.cmdASCII.run);
   res.end;
 });
 
 
 app.get('/runLinear', (req, res) => {
-  swtchSql = insSql;
   swtchs = runLinear;
   VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
   VFDB.linear.loop *= 2;
-  res.send('ok');
   VFDB.linear.rstrt = VFDB.linear.strt;
-  setQ(VFDB.cmdASCII.run);
+  run();
+  res.send('ok');
   res.end;
 });
 
 app.post('/saveConf',(req,res)=>{
-  console.log(JSON.stringify(req.body));
   let data = JSON.stringify(req.body);
-  fs.writeFile('./client/VFD-B.json',data,'utf8',(cb)=>{});
+  fs.writeFile('./client/VFD-B.json',data,'utf8',(cb)=>{
+    VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
+  });
   res.send('ok');
   res.end;
 });

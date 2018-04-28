@@ -1,12 +1,12 @@
-let xmlhttp = new XMLHttpRequest();
-let socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
-//let socket;// = new WebSocket('ws://192.168.0.11:8887');
+const xmlhttp = new XMLHttpRequest();
+let socket = new WebSocket('ws://' + window.location.hostname +':8887');
 let HzBarC;
 let t1 = 0;
 let DT = [],
   PV = [],
-  SV = [];
+  Hz = [];
 let testD;
+let echartOption = {};
 xmlhttp.onreadystatechange = function () {
   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
     console.log(xmlhttp.response);
@@ -15,7 +15,7 @@ xmlhttp.onreadystatechange = function () {
 
 function rcws() {
 
-  socket = new WebSocket('ws://suzhou.kenjichen.com:8887');
+  socket = new WebSocket('ws://' + window.location.hostname +':8887');
 
   socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
@@ -27,21 +27,17 @@ function rcws() {
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
       DT.push(a.DT);
       //PV.push(a.PV);
-      SV.push(a.SV);
+      Hz.push(a.SV);
       HzBarC.setOption({
         xAxis: {
           data: DT
         },
-        series: [{
-          name: 'PV',
-          type: 'line',
-          data: PV
-        },
+        series: [
         {
-          name: 'SV',
+          name: 'Hz',
           type: 'line',
           step: 'middle',
-          data: SV
+          data: Hz
         }
         ]
       });
@@ -66,7 +62,7 @@ function rcws() {
 rcws();
 
 function run() {
-  xmlhttp.open("GET", '/run', true);
+  xmlhttp.open("GET", $('input[name=opMode]:checked').val(), true);
   xmlhttp.responseType = 'text';
   xmlhttp.send();
 }
@@ -89,25 +85,26 @@ function parseHis(result) {
   for (let i = 0; i < result.length; i++) {
     DT[i] = new Date(result[i].DateTime).toLocaleString();
     PV[i] = result[i].PV;
-    SV[i] = result[i].SV;
+    Hz[i] = result[i].SV;
   }
   HzBarC.setOption({
     xAxis: {
       data: DT
     },
-    series: [{
-      name: 'PV',
-      type: 'line',
-      data: PV
-    },
+    series: [
     {
-      name: 'SV',
+      name: 'Hz',
       type: 'line',
       step: 'middle',
-      data: SV
+      data: Hz
     }
     ]
   });
+}
+
+function clearChart(){
+  echartOption.default.series.Hz = [];
+  HzBarC.setOption(echartOption.default);
 }
 
 
@@ -134,17 +131,10 @@ $(function () {
     skin: 1,
     step: 10
   });
-});
-$(document).ready(function () {
-
-
-
-
 
   $('#runB').bind('click', function () {
-    xmlhttp.open("GET", $('input[name=opMode]:checked').val(), true);
-    xmlhttp.responseType = 'text';
-    xmlhttp.send();
+    clearChart();
+    run();
   });
 
   $('#testB').bind('click', function () {
@@ -170,7 +160,7 @@ $(document).ready(function () {
 
 
   $('#getHisB').click(() => {
-    let url = `http://suzhou.kenjichen.com:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
+    let url = `http://${window.location.hostname}:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
     $.get(url, (result) => {
       parseHis(result);
     });
@@ -209,7 +199,7 @@ $(document).ready(function () {
     $('#062001')[0].stepDown(5);
     $('#setSV').click();
   });
-  
+
   $.getJSON('./client/VFD-B.json', (data) => {
     let a = document.getElementById('mmtable');
     testD = data;
@@ -228,15 +218,22 @@ $(document).ready(function () {
     a.children[1].children[0].children[0].innerText = testD.linear.strt;
     a.children[1].children[0].children[1].innerText = testD.linear.end;
     a.children[1].children[0].children[2].innerText = testD.linear.loop;
-    a.children[1].children[0].children[3].innerText = testD.linear.tm;
+    a.children[1].children[0].children[3].innerText = testD.linear.tm / 60;
     $('#linear-table').editableTableWidget();
     a = document.getElementById('log-table');
     a.children[1].children[0].children[0].innerText = testD.lgrm.strt;
     a.children[1].children[0].children[1].innerText = testD.lgrm.span + testD.lgrm.strt;
     a.children[1].children[0].children[2].innerText = testD.lgrm.loop;
-    a.children[1].children[0].children[3].innerText = testD.lgrm.tm;
+    a.children[1].children[0].children[3].innerText = testD.lgrm.tm / 60;
     $('#log-table').editableTableWidget();
-    
+
+  });
+
+  $.getJSON('./client/echarts.json', (data) => {
+    echartOption = data;
+    HzBarC.setOption(
+      echartOption.default
+    );
   });
 
 
@@ -268,11 +265,11 @@ $(document).ready(function () {
     testD.lgrm.strt = parseInt($('#log-table tbody tr')[0].children[0].innerText);
     testD.lgrm.span = Math.abs(parseInt($('#log-table tbody tr')[0].children[0].innerText - $('#log-table tbody tr')[0].children[1].innerText));
     testD.lgrm.loop = parseInt($('#log-table tbody tr')[0].children[2].innerText);
-    testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText);
+    testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText) * 60;
     testD.linear.strt = parseInt($('#linear-table tbody tr')[0].children[0].innerText);
     testD.linear.end = parseInt($('#linear-table tbody tr')[0].children[1].innerText);
     testD.linear.loop = parseInt($('#linear-table tbody tr')[0].children[2].innerText);
-    testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText);
+    testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText) * 60;
     let data = JSON.stringify(testD);
     xmlhttp.open("POST", "/saveConf", true);
     xmlhttp.setRequestHeader("Content-type", "application/json");
@@ -292,92 +289,20 @@ $(document).ready(function () {
 
 
   HzBarC = echarts.init($('#HzBarC')[0]);
-  HzBarC.setOption({
-    title: {
-      text: '振动频率图text',
-    },
-    legend: {
-      data: ['PV', 'SV']
-    },
-    tooltip: {
-      trigger: 'axis'
-    },
-    toolbox: {
-      show: true,
-      feature: {
-        dataView: {
-          readOnly: false
-        },
-        restore: {},
-        saveAsImage: {}
-      }
-    },
-    dataZoom: [{
-      type: 'slider',
-      xAxisIndex: 0,
-      start: 0,
-      end: 100
-    },
-    {
-      type: 'slider',
-      yAxisIndex: 0,
-      filterMode: 'empty',
-      start: 0,
-      end: 100
-    },
-    {
-      type: 'inside',
-      yAxisIndex: 0,
-      filterMode: 'empty'
-    }
-    ],
-
-    xAxis: {
-      data: []
-    },
-    yAxis: [{
-      type: 'value',
-      name: 'Hz',
-      min: 0,
-      max: 100,
-      maxInterval: 10,
-      position: 'left',
-      axisLabel: {
-        formatter: '{value} Hz',
-        textStyle: {
-          color: '#fbafaf'
-        }
-      }
-    }],
-    series: [{
-      name: 'PV',
-      type: 'line',
-      data: []
-    },
-    {
-      name: 'SV',
-      type: 'line',
-      step: 'middle',
-      itemStyle: {
-        normal: {
-          color: "#ff715e"
-        }
-      },
-      data: []
-    }
-    ]
-  });
+  // HzBarC.setOption(
+  //   echartOption.default
+  // );
 
 /*
 modal draggable
 */
 
 $('#opModal').draggable({
-  handle:".modal-header"
+  handle: ".modal-header"
 })
 
 $('#confModal').draggable({
-  handle:".modal-header"
+  handle: ".modal-header"
 })
 
 });
