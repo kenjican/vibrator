@@ -1,5 +1,5 @@
 const xmlhttp = new XMLHttpRequest();
-let socket = new WebSocket('ws://' + window.location.hostname +':8887');
+let socket = new WebSocket('ws://' + window.location.hostname + ':8887');
 let HzBarC;
 let t1 = 0;
 let DT = [],
@@ -14,9 +14,7 @@ xmlhttp.onreadystatechange = function () {
 };
 
 function rcws() {
-
-  socket = new WebSocket('ws://' + window.location.hostname +':8887');
-
+  socket = new WebSocket('ws://' + window.location.hostname + ':8887');
   socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
     $("#SDT").text(a.DT);
@@ -33,12 +31,12 @@ function rcws() {
           data: DT
         },
         series: [
-        {
-          name: 'Hz',
-          type: 'line',
-          step: 'middle',
-          data: Hz
-        }
+          {
+            name: 'Hz',
+            type: 'line',
+            step: 'middle',
+            data: Hz
+          }
         ]
       });
     }
@@ -92,19 +90,32 @@ function parseHis(result) {
       data: DT
     },
     series: [
-    {
-      name: 'Hz',
-      type: 'line',
-      step: 'middle',
-      data: Hz
-    }
+      {
+        name: 'Hz',
+        type: 'line',
+        step: 'middle',
+        lineStyle:{
+          color: '#454345'
+        },
+        data: Hz
+      }
     ]
   });
 }
 
-function clearChart(){
-  echartOption.default.series.Hz = [];
-  HzBarC.setOption(echartOption.default);
+function clearChart() {
+  //location.reload();
+  DT = [];
+  Hz = [];
+  HzBarC.setOption({
+    xAxis: {
+      data: DT
+    },
+    series: [
+      { data: Hz }
+    ]
+  }
+  );
 }
 
 
@@ -152,15 +163,10 @@ $(function () {
     xmlhttp.send();
   });
 
-  $('#runStpsB').click(() => {
-    xmlhttp.open("GET", '/stps', true);
-    xmlhttp.responseType = "text";
-    xmlhttp.send();
-  });
-
 
   $('#getHisB').click(() => {
     let url = `http://${window.location.hostname}:8889/getHis/${$('#fEC').val()}/${$('#tEC').val()}`;
+    clearChart();
     $.get(url, (result) => {
       parseHis(result);
     });
@@ -175,11 +181,6 @@ $(function () {
     xmlhttp.open("GET", '/test/' + cmd, true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
-    /*
-         $.get('/test/:' + cmd,function(data){
-            console.log(data);
-           });
-    */
   });
 
   $('#setHzTxt').keyup(function (event) {
@@ -274,11 +275,6 @@ $(function () {
     xmlhttp.open("POST", "/saveConf", true);
     xmlhttp.setRequestHeader("Content-type", "application/json");
     xmlhttp.send(data);
-    /*
-      $.post('/saveConf',(testD,status)=>{
-         console.log(status);
-      },'json');
-    */
   });
 
 
@@ -287,22 +283,51 @@ $(function () {
     $("#sheet").attr("href", $("#ssS").val());
   });
 
+/*   $('.opL').change(()=>{
+    switch ($('input[name=opMode]:checked').val()){
+      case '/runLoga':{
+        $('#dashboard tbody tr')[0].children[4].innerText = testD.lgrm.tm/60;
+        $('#dashboard tbody tr')[0].children[5].innerText = testD.lgrm.loop;
+        $('#dashboard tbody tr')[0].children[6].innerText = testD.lgrm.strt;
+        $('#dashboard tbody tr')[0].children[7].innerText = testD.lgrm.strt + testD.lgrm.span;
+        $('#dashboard tbody tr')[0].children[8].innerText = '对数扫频';
+        break;
+      }
+
+      case '/runLinear':{
+        $('#dashboard tbody tr')[0].children[4].innerText = testD.linear.tm/60;
+        $('#dashboard tbody tr')[0].children[5].innerText = testD.linear.loop;
+        $('#dashboard tbody tr')[0].children[6].innerText = testD.linear.strt;
+        $('#dashboard tbody tr')[0].children[7].innerText = testD.linear.end;
+        $('#dashboard tbody tr')[0].children[8].innerText = '线性扫频';
+        break;
+      }
+      default:{
+        break;
+      }
+    }
+  });
+ */
 
   HzBarC = echarts.init($('#HzBarC')[0]);
-  // HzBarC.setOption(
-  //   echartOption.default
-  // );
 
-/*
-modal draggable
-*/
+  (() => {
+    $.get('http://' + window.location.hostname + ':8889/getRT', (result) => {
+      console.log(result);
+      parseHis(result);
+    });
+  })();
 
-$('#opModal').draggable({
-  handle: ".modal-header"
-})
+  /*
+  modal draggable
+  */
 
-$('#confModal').draggable({
-  handle: ".modal-header"
-})
+  $('#opModal').draggable({
+    handle: ".modal-header"
+  })
+
+  $('#confModal').draggable({
+    handle: ".modal-header"
+  })
 
 });

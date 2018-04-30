@@ -254,10 +254,10 @@ app.get('/runLoga', function(req, res) {
 
 
 app.get('/runLinear', (req, res) => {
-  swtchs = runLinear;
   VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
   VFDB.linear.loop *= 2;
   VFDB.linear.rstrt = VFDB.linear.strt;
+  swtchs = runLinear;
   run();
   res.send('ok');
   res.end;
@@ -289,6 +289,8 @@ WebSocket
 let wss = new WebSocketServer({
   port: 8887
 });
+
+wss.on('error',()=>{console.log('websocket error')});
 
 function sendsts() {
   wss.clients.forEach((conn) => {
