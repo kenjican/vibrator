@@ -20,13 +20,13 @@
             "show": "true",
             "feature": {
                 "dataView": {
-                    "readOnly": "false"
+                    "readOnly": false
                 },
                 "restore": {
-                    "show": "true"
+                    "show": true
                 },
                 "saveAsImage": {
-                    "show": "true"
+                    "show": true
                 }
             },
             "iconStyle":{
@@ -41,7 +41,6 @@
             {
                 "type": "slider",
                 "xAxisIndex": 0,
-                "yAxisIndex":0,
                 "start": 0,
                 "end": 100
             }
