@@ -1,1 +1,82 @@
-{"con":{"baudRate":38400,"dataBits":7,"stopBits":2,"parity":"none"},"cmdASCII":{"run":":010620000002D7\r\n","stop":":010620000001D8\r\n","getPV":":010321030001","getSV":":010321020001","setSV":":01062001","setZero":":010620010000D8\r\n","getPSS":":010321010003D7\r\n","Que":[],"Mutex":true},"sts":{"DT":"","stts":"","PV":"","SV":""},"stps":{"mltLvl":[[20,2],[25,2],[30,2],[35,2],[40,2],[45,2],[50,2],[55,2]],"loop":20,"lvlPointer":0,"loopPointer":0},"lgrm":{"strt":10,"span":45,"tm":1200,"log10":1.6532,"lcount":1,"loop":2,"drc":1},"linear":{"strt":60,"end":0,"tm":1200,"rstrt":0,"lcount":0,"loop":100,"Arith":0}}
+{
+    "con": {
+        "baudRate": 38400,
+        "dataBits": 7,
+        "stopBits": 2,
+        "parity": "none"
+    },
+    "cmdASCII": {
+        "run": ":010620000002D7\r\n",
+        "stop": ":010620000001D8\r\n",
+        "getPV": ":010321030001",
+        "getSV": ":010321020001",
+        "setSV": ":01062001",
+        "setZero": ":010620010000D8\r\n",
+        "getPSS": ":010321010003D7\r\n",
+        "Que": [],
+        "Mutex": true
+    },
+    "sts": {
+        "DT": "",
+        "stts": "",
+        "PV": "",
+        "SV": ""
+    },
+    "stps": {
+        "mltLvl": [
+            [
+                20,
+                2
+            ],
+            [
+                25,
+                2
+            ],
+            [
+                30,
+                2
+            ],
+            [
+                35,
+                2
+            ],
+            [
+                40,
+                2
+            ],
+            [
+                45,
+                2
+            ],
+            [
+                50,
+                2
+            ],
+            [
+                55,
+                2
+            ]
+        ],
+        "loop": 20,
+        "lvlPointer": 0,
+        "loopPointer": 0
+    },
+    "lgrm": {
+        "strt": 10,
+        "span": 45,
+        "tm": 1200,
+        "log10": 1.6532,
+        "lcount": 1,
+        "loop": 100,
+        "drc": 1
+    },
+    "linear": {
+        "strt": 60,
+        "end": 0,
+        "tm": 1200,
+        "rstrt": 0,
+        "lcount": 0,
+        "loop": 100,
+        "Arith": 0
+    }
+}

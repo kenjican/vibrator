@@ -28,10 +28,10 @@ let getPSS = function() {
 let swtchs = noinsSql;
 
 /*
-Set up serial port
+Set up serial port for VFDB
 */
 
-let U1 = new SP('/dev/ttyUSB0', {
+let U1 = new SP('/dev/VFDB', {
   baudRate: VFDB.con.baudRate,
   dataBits: VFDB.con.dataBits,
   stopBits: VFDB.con.stopBits,
@@ -83,6 +83,48 @@ function chkQ() {
   }
   VFDB.cmdASCII.Mutex = true;
 }
+
+/*
+setup serial port for PC
+*/
+
+
+let U2 = new SP('/dev/PC', {
+  baudRate: 9600,
+  dataBits: 8,
+  stopBits: 1,
+  parity: 'none'
+});
+
+let parser2 = U2.pipe(new Readline({
+  delimiter: '\r\n'
+}));
+
+parser2.on('data', function(data) {
+  switch (data.slice(0,2)) {
+    case '63':
+      setSV(data.slice(2,5));
+      U2.write('635\r\n');
+      break;
+    case '62':
+      setSV(data.slice(2,5));
+      U2.write('624\r\n');
+      break;
+    case '61':
+      run();
+      U2.write('617\r\n');
+      break;
+    case '64':
+      stop();
+      U2.write('642\r\n');
+      break;
+    default:
+      break;
+  }
+});
+
+
+U2.on('error', (err) => console.log(err));
 
 
 /*

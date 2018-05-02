@@ -23,6 +23,8 @@ function rcws() {
     $('#dashboard tbody tr')[0].children[0].innerText = a.SV;
     $("#HzSts").text(a.stts);
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
+      $('#stsLight').css('background-color','red');
+      $('#stsLight').text("运转");
       DT.push(a.DT);
       //PV.push(a.PV);
       Hz.push(a.SV);
@@ -39,7 +41,10 @@ function rcws() {
           }
         ]
       });
+      return;
     }
+    $('#stsLight').css('background-color','green');
+    $('#stsLight').text("停止");
   };
 
   socket.onclose = () => {

@@ -3,23 +3,12 @@
     "host":"localhost",
     "user":"root",
     "password":"chenjia1!",
-    "database":"VFDB",
-    "table":"Apr04"
+    "database":"2018",
+    "table":"Apr"
   },
 
   "sql":{
     "checkDB":"show databases like ",
     "createDB":"CHARACTER SET utf8 COLLATE utf8_general_ci"
   }
-
-
-
-
-
-
-
-
-
-
-
 }
