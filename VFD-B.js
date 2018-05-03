@@ -14,8 +14,13 @@ functions for switch
 */
 
 const insSql = function() {
-  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => {});
-};
+  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => {}
+  );
+}
+
+process.on('uncaughtException', function (err) {
+  console.log(err);
+}); 
 const noinsSql = function() {};
 let swtchSql = noinsSql;
 
