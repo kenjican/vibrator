@@ -3,7 +3,7 @@ const app = express();
 const fs = require('fs');
 const mysql = require('mysql');
 const DB = JSON.parse(fs.readFileSync('./mysql.json'));
-
+DB.con.table = new Date().toLocaleString('en-us',{month:'short'});//
 /*
 Mysql
 */
@@ -16,6 +16,7 @@ let con = mysql.createConnection({
   dataStrings: true,
   insecureAuth: true
 });
+
 
 con.connect((err) => {
   if (err) {
@@ -35,16 +36,17 @@ app.use((req, res, next) => {
 });
 
 app.get('/insert/:sts', (req, res) => {
+  res.end('ok');
   let d = JSON.parse(req.params.sts);
-  let sql = `insert into Apr (PV, SV, Sts) values (${d.PV},${d.SV},${parseInt(d.stts)})`;
-  con.query(sql, (err, result) => {
+  let sql = `insert into ${DB.con.table} (PV, SV, Sts) values (${d.PV},${d.SV},${parseInt(d.stts)})`;
+  con.query(sql, (err) => {
     if (err) throw err;
   });
-  res.end('ok');
+
 });
 
 app.get('/getHis/:fDate/:tDate', (req, res) => {
-  let sql = `select DateTime,PV,SV from Apr where DateTime between '${req.params.fDate}' and '${req.params.tDate})'`;// and (id mod 5 = 0)`;
+  let sql = `select DateTime,PV,SV from May where DateTime between '${req.params.fDate}' and '${req.params.tDate})'`;// and (id mod 5 = 0)`;
   con.query(sql, (err, result, fields) => {
     if (err) throw err;
     res.send(result);
@@ -59,16 +61,17 @@ app.get('/getRT', (req, res) => {
   let span = 0;
   let sql = 'select strtTime from schedule order by id desc limit 1';
   con.query(sql, (err, result) => {
-    sql = "select id from Apr where DateTime >= '" + result[0].strtTime.toLocaleString() + "' limit 1";
+    let table = result[0].strtTime.toLocaleString('en-us',{month:'short'});
+    sql = `select id from ${table} where DateTime >= '${result[0].strtTime.toLocaleString()}' limit 1`;
     con.query(sql,(err,result)=>{
       firId = result[0].id - 1;
-      sql = "select id from Apr order by id desc limit 1";
+      sql = `select id from ${table} order by id desc limit 1`;
       con.query(sql, (err, result) => {
         lstId = result[0].id;
         span = parseInt((lstId - firId)/1000) + 1;
-        sql = `select DateTime,PV,SV from Apr where id >= ${firId} and (id mod ${span} = 0)`;
+        sql = `select DateTime,PV,SV from ${table} where id >= ${firId} and (id mod ${span} = 0)`;
           con.query(sql,(err,result)=>{
-            if(err) throw err;
+            if(err) console.log(err);
             res.send(result);
             res.end;
           });
@@ -79,6 +82,7 @@ app.get('/getRT', (req, res) => {
 
 
 app.get('/sql/:cmd', (req, res) => {
+  //console.log(req.params.cmd);
   con.query(req.params.cmd, (err, result) => {
     if (err) throw err;
   });

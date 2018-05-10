@@ -52,7 +52,7 @@ input[type=number]::-webkit-outer-spin-button {
   opacity:1;
 }
 
-#mmtable,#linear-table,#log-table{
+#mmtable,#linear-table,#log-table,#general-table{
   margin:0 auto;
   width:80%;
   height:20%;

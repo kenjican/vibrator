@@ -1,5 +1,6 @@
-const xmlhttp = new XMLHttpRequest();
-let socket = new WebSocket('ws://' + window.location.hostname + ':8887');
+//const xmlhttp = new XMLHttpRequest();
+//let socket = new WebSocket('ws://' + window.location.hostname + ':8887');
+let socket;
 let HzBarC;
 let t1 = 0;
 let DT = [],
@@ -7,12 +8,13 @@ let DT = [],
   Hz = [];
 let testD;
 let echartOption = {};
+/*
 xmlhttp.onreadystatechange = function () {
   if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
     console.log(xmlhttp.response);
   }
 };
-
+*/
 function rcws() {
   socket = new WebSocket('ws://' + window.location.hostname + ':8887');
   socket.onmessage = function (msg) {
@@ -20,7 +22,8 @@ function rcws() {
     $("#SDT").text(a.DT);
     $("#HzPV").text(a.PV);
     $("#HzSV").text(a.SV);
-    $('#dashboard tbody tr')[0].children[0].innerText = a.SV;
+    $('#dashboard tbody tr td')[0].innerText = a.SV;
+    $('#dashboard tbody tr td')[1].innerText = a.runMode;
     $("#HzSts").text(a.stts);
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
       $('#stsLight').css('background-color','red');
@@ -32,6 +35,7 @@ function rcws() {
         xAxis: {
           data: DT
         },
+
         series: [
           {
             name: 'Hz',
@@ -60,20 +64,27 @@ function rcws() {
     }
   };
 
+  $(window).on('beforeunload',()=>{
+    socket.close();
+  });
+
 
 }
-rcws();
+//rcws();
 
 function run() {
-  xmlhttp.open("GET", $('input[name=opMode]:checked').val(), true);
-  xmlhttp.responseType = 'text';
-  xmlhttp.send();
+  $.get($('input[name=opMode]:checked').val(),(data)=>{
+    $('#dashboard tbody tr td')[1].innerText = data;
+  });
 }
 
 function stop() {
+  $.get('/stop');
+  /*
   xmlhttp.open("GET", '/stop', true);
   xmlhttp.responseType = 'text';
   xmlhttp.send();
+  */
 }
 
 function LRCchk(cmd) {
@@ -106,6 +117,7 @@ function parseHis(result) {
       }
     ]
   });
+  rcws();
 }
 
 function clearChart() {
@@ -152,7 +164,7 @@ $(function () {
     clearChart();
     run();
   });
-
+/*
   $('#testB').bind('click', function () {
     let a = LRCchk($('#test').val());
     console.log(a);
@@ -161,11 +173,14 @@ $(function () {
     xmlhttp.send();
   });
 
-
+*/
   $('#stopB').bind('click', function () {
+    stop();
+    /*
     xmlhttp.open("GET", '/stop', true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
+    */
   });
 
 
@@ -183,11 +198,14 @@ $(function () {
     let cmd = VFDBcmd.MNo + VFDBcmd[this.id][0] + v.toUpperCase();
     cmd += LRCchk(cmd);
     console.log(cmd);
+    $.get('/test/' + cmd);
+    /*
     xmlhttp.open("GET", '/test/' + cmd, true);
     xmlhttp.responseType = 'text';
     xmlhttp.send();
+    */
   });
-
+/*
   $('#setHzTxt').keyup(function (event) {
     if (event.keyCode === 13) {
       xmlhttp.open("GET", '/setHz/' + $('#setHzTxt').val(), true);
@@ -195,7 +213,7 @@ $(function () {
       xmlhttp.send();
     }
   });
-
+*/
   $('#stpup').click(() => {
     $('#062001')[0].stepUp(5);
     $('#setSV').click();
@@ -219,20 +237,26 @@ $(function () {
     $('#mmtable').editableTableWidget();
     $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
 
-    a = document.getElementById('linear-table');
+    a = $('#linear-table tbody tr td');
 
-    a.children[1].children[0].children[0].innerText = testD.linear.strt;
-    a.children[1].children[0].children[1].innerText = testD.linear.end;
-    a.children[1].children[0].children[2].innerText = testD.linear.loop;
-    a.children[1].children[0].children[3].innerText = testD.linear.tm / 60;
+    a[0].innerText = testD.linear.strt;
+    a[1].innerText = testD.linear.end;
+    a[2].innerText = testD.linear.loop;
+    a[3].innerText = testD.linear.tm / 60;
     $('#linear-table').editableTableWidget();
-    a = document.getElementById('log-table');
-    a.children[1].children[0].children[0].innerText = testD.lgrm.strt;
-    a.children[1].children[0].children[1].innerText = testD.lgrm.span + testD.lgrm.strt;
-    a.children[1].children[0].children[2].innerText = testD.lgrm.loop;
-    a.children[1].children[0].children[3].innerText = testD.lgrm.tm / 60;
+    
+    a = $('#log-table tbody tr td');
+    a[0].innerText = testD.lgrm.strt;
+    a[1].innerText = testD.lgrm.end;
+    a[2].innerText = testD.lgrm.loop;
+    a[3].innerText = testD.lgrm.tm / 60;
     $('#log-table').editableTableWidget();
-
+    a = $('#general-table tbody tr td')
+    a[0].innerText = testD.expInfo.expName;
+    a[1].innerText = testD.expInfo.prdName;
+    a[2].innerText = testD.expInfo.prdSn;
+    a[3].innerText = testD.expInfo.memo;
+    $('#general-table').editableTableWidget();
   });
 
   $.getJSON('./client/echarts.json', (data) => {
@@ -265,10 +289,11 @@ $(function () {
       x.push(t);
       y.push(x);
     }
-    console.log(y);
     testD.stps.mltLvl = y;
     testD.stps.loop = parseInt($('#stpsloop').val());
     testD.lgrm.strt = parseInt($('#log-table tbody tr')[0].children[0].innerText);
+    testD.lgrm.end = parseInt($('#log-table tbody tr')[0].children[1].innerText);
+    //testD.lgrm.end > testD.lgrm.strt ? testD.lgrm.drc = 1: testD.lgrm.drc = -1;
     testD.lgrm.span = Math.abs(parseInt($('#log-table tbody tr')[0].children[0].innerText - $('#log-table tbody tr')[0].children[1].innerText));
     testD.lgrm.loop = parseInt($('#log-table tbody tr')[0].children[2].innerText);
     testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText) * 60;
@@ -276,13 +301,24 @@ $(function () {
     testD.linear.end = parseInt($('#linear-table tbody tr')[0].children[1].innerText);
     testD.linear.loop = parseInt($('#linear-table tbody tr')[0].children[2].innerText);
     testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText) * 60;
+    testD.expInfo.expName = $('#general-table tbody tr td')[0].innerText;
+    testD.expInfo.prdName = $('#general-table tbody tr td')[1].innerText;
+    testD.expInfo.prdSn = $('#general-table tbody tr td')[2].innerText;
+    testD.expInfo.memo = $('#general-table tbody tr td')[3].innerText;
     let data = JSON.stringify(testD);
-    xmlhttp.open("POST", "/saveConf", true);
-    xmlhttp.setRequestHeader("Content-type", "application/json");
-    xmlhttp.send(data);
+    $.ajax({
+      type:'POST',
+      url:'/saveConf',
+      contentType:'application/json',
+      data:data
+    }).done((res)=>{
+      $('#updtAlert').css('display','inline-block');
+      $('#updtAlert').html(res);
+      $('#updtAlert').fadeTo(2000,500).slideUp(500,()=>{
+        $('#updtAlert').slideUp(500);
+      });
+    });
   });
-
-
 
   $("#ssS").change(() => {
     $("#sheet").attr("href", $("#ssS").val());
@@ -318,10 +354,13 @@ $(function () {
 
   (() => {
     $.get('http://' + window.location.hostname + ':8889/getRT', (result) => {
-      console.log(result);
       parseHis(result);
+    }).fail(()=>{
+      rcws();
+      alert('数据库断线，无法记录数据，请联系供应商');
     });
-  })();
+})();
+
 
   /*
   modal draggable

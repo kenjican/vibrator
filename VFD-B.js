@@ -13,24 +13,21 @@ const http = require('http');
 functions for switch
 */
 
-const insSql = function() {
-  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => {}
-  );
-}
-
-process.on('uncaughtException', function (err) {
-  console.log(err);
-}); 
 const noinsSql = function() {};
 let swtchSql = noinsSql;
+let swtchs = noinsSql;
 
+const insSql = function() {
+  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => {}).on('error',(e)=>{
+    console.error(`error: ${e.message}`);
+  });
+}
 
 let getPSS = function() {
   swtchs();
   setQ(VFDB.cmdASCII.getPSS);
 };
 
-let swtchs = noinsSql;
 
 /*
 Set up serial port for VFDB
@@ -41,6 +38,10 @@ let U1 = new SP('/dev/VFDB', {
   dataBits: VFDB.con.dataBits,
   stopBits: VFDB.con.stopBits,
   parity: VFDB.con.parity
+});
+
+U1.on('error',(err)=>{
+  console.log(err + 'VFDB not connected');
 });
 
 let parser = U1.pipe(new Readline({
@@ -61,33 +62,9 @@ parser.on('data', function(data) {
     default:
       chkQ();
       break;
-
   }
 });
 
-
-U1.on('error', (err) => console.log(err));
-
-function setQ(cmd) {
-  if (VFDB.cmdASCII.Mutex) {
-    VFDB.cmdASCII.Mutex = false;
-    U1.write(cmd);
-  } else {
-    VFDB.cmdASCII.Que.push(cmd);
-    if (VFDB.cmdASCII.Que.length > 2) {
-      VFDB.cmdASCII.Mutex = true;
-      VFDB.cmdASCII.QUE = [];
-    }
-  }
-}
-
-function chkQ() {
-  if (VFDB.cmdASCII.Que.length != 0) {
-    U1.write(VFDB.cmdASCII.Que.shift());
-    return;
-  }
-  VFDB.cmdASCII.Mutex = true;
-}
 
 /*
 setup serial port for PC
@@ -102,7 +79,7 @@ let U2 = new SP('/dev/PC', {
 });
 
 let parser2 = U2.pipe(new Readline({
-  delimiter: '\r\n'
+  delimiter: '\n'
 }));
 
 parser2.on('data', function(data) {
@@ -129,8 +106,7 @@ parser2.on('data', function(data) {
 });
 
 
-U2.on('error', (err) => console.log(err));
-
+U2.on('error', (err) => console.log(err + 'PC port not opened'));
 
 /*
 LRC calculation
@@ -155,11 +131,9 @@ function runStps() {
     if (VFDB.stps.loopPointer != VFDB.stps.loop) {
       VFDB.stps.lvlPointer = 0;
     } else {
-      setQ(VFDB.cmdASCII.stop);
-      setSV(0);
       clearTimeout(t2);
-      let sql = 'update schedule set endTime=NULL order by id desc limit 1';
-      http.get('http://localhost:8889/sql/' + sql , (res) => {});
+      stop();
+      //setSV(0);
       return;
     }
   }
@@ -169,44 +143,40 @@ function runStps() {
 }
 
 /*
-Logarithm logic and function
+Logarithm logic and function. Timer set 100ms , VFDB would stop update SV ,other operation still working.
 */
 
 function runLoga() {
-  let SV = 10 ** (VFDB.lgrm.log10 / VFDB.lgrm.tm * VFDB.lgrm.lcount) + VFDB.lgrm.strt;
+  let SV = (10 ** (VFDB.lgrm.log10 / VFDB.lgrm.tm * VFDB.lgrm.lcount)) * VFDB.lgrm.k + VFDB.lgrm.strt;
   setSV(SV);
+  VFDB.lgrm.lcount += VFDB.lgrm.drc;
   if ((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)) {
     VFDB.lgrm.loop -= 1;
     if (VFDB.lgrm.loop == 0) {
-      swtchs = noinsSql;
-      swtchSql = noinsSql;
-      setQ(VFDB.cmdASCII.stop);
-      setSV(0);
+      //swtchs = noinsSql;
+      //swtchSql = noinsSql;
+      setSV(VFDB.lgrm.end);
+      stop();
+      //setSV(0);
       return;
     }
     VFDB.lgrm.drc = VFDB.lgrm.drc - (VFDB.lgrm.drc * 2);
   }
-
-  VFDB.lgrm.lcount += VFDB.lgrm.drc;
 }
 
-function setSV(sv) {
-  let SV2hex = (parseInt(sv * 100)).toString(16).padStart(4, '0');
-  let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1, ) + SV2hex);
-  let sSV = (VFDB.cmdASCII.setSV + SV2hex + LRC).toUpperCase() + '\r\n';
-  setQ(sSV);
-}
-
+/*
+Linear logic and function
+*/
 
 function runLinear() {
   if (VFDB.linear.lcount == VFDB.linear.tm) {
     VFDB.linear.loop -= 1;
     VFDB.linear.Arith *= -1;
     if (VFDB.linear.loop == 0) {
-      swtchSql = noinsSql;
-      swtchs = noinsSql;
-      setQ(VFDB.cmdASCII.stop);
-      setSV(0);
+      //swtchSql = noinsSql;
+      //swtchs = noinsSql;
+      stop();
+      //setSV(0);
       return;
     }
     VFDB.linear.lcount = 0;
@@ -220,12 +190,25 @@ function runLinear() {
   VFDB.linear.lcount += 1;
 }
 
+/*
+functions in common
+*/
+
+function setSV(sv) {
+  let SV2hex = (parseInt(sv * 100)).toString(16).padStart(4, '0');
+  let LRC = LRCchk((VFDB.cmdASCII.setSV).slice(1, ) + SV2hex);
+  let sSV = (VFDB.cmdASCII.setSV + SV2hex + LRC).toUpperCase() + '\r\n';
+  setQ(sSV);
+}
+
 function run(){
   swtchSql = insSql;
   setQ(VFDB.cmdASCII.run);
-  let sql = 'insert into schedule (expName) values ("test")';
-  http.get('http://localhost:8889/sql/' + sql ,(res) => {});
-
+  let sql = `insert into schedule (expName,prdName,prdSn,memo) values ('${VFDB.expInfo.expName}','${VFDB.expInfo.prdName}','${VFDB.expInfo.prdSn}','${VFDB.expInfo.memo}')`;
+  sql = encodeURIComponent(sql);
+  http.get('http://localhost:8889/sql/' + sql ,(res) => {}).on('error',(e)=>{
+    console.error(e);
+  });
 }
 
 function stop(){
@@ -235,16 +218,42 @@ function stop(){
   setSV(0);
   clearTimeout(t2);
   let sql = 'update schedule set endTime=NULL order by id desc limit 1';
-  http.get('http://localhost:8889/sql/' + sql , (res) => {});
-
-
+  http.get('http://localhost:8889/sql/' + sql , (res) => {}).on('error',(e)=>{
+    console.error(e);
+  });
 }
 
+function setQ(cmd) {
+  if (VFDB.cmdASCII.Mutex) {
+    VFDB.cmdASCII.Mutex = false;
+    U1.write(cmd);
+  } else {
+    VFDB.cmdASCII.Que.push(cmd);
+    if (VFDB.cmdASCII.Que.length > 2) {
+      VFDB.cmdASCII.Mutex = true;
+      VFDB.cmdASCII.QUE = [];
+    }
+  }
+}
+
+
+function chkQ() {
+  if (VFDB.cmdASCII.Que.length != 0) {
+    U1.write(VFDB.cmdASCII.Que.shift());
+    return;
+  }
+  VFDB.cmdASCII.Mutex = true;
+}
+
+function rldConf(){
+  VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
+}
 /*
 Web
 */
 
 app.use('/client', express.static('./client'));
+//app.use(bodyParser);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -282,41 +291,71 @@ app.get('/test/:cmd', function(req, res) {
   res.end;
 });
 
-app.get('/stps', function(req, res) {
+app.get('/runFix',(req,res)=>{
+  VFDB.sts.runMode = "定频";
+  run();
+  res.end(VFDB.sts.runMode);
+})
+
+app.get('/runStps', function(req, res) {
+  rldConf();
   VFDB.stps.lvlPointer = 0;
+  VFDB.sts.runMode = "多阶";
+  setSV(0);
   run();
   runStps();
-  res.send('step running');
-  res.end;
+  res.end(VFDB.sts.runMode);
 });
 
 app.get('/runLoga', function(req, res) {
-  swtchs = runLoga;
-  VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
+  rldConf();
+  if(VFDB.lgrm.strt > VFDB.lgrm.end){
+    VFDB.lgrm.k = -1;
+    VFDB.lgrm.strt += 1;
+  }else{
+    VFDB.lgrm.k = 1;
+    VFDB.lgrm.strt -= 1;
+  }
+  //VFDB.lgrm.lcount = 0;
+  //VFDB.lgrm.strt > VFDB.lgrm.end ? VFDB.lgrm.k = -1; VFDB.lgrm.strt++: VFDB.lgrm.k = 1 VFDB.lgrm.strt--;
+  VFDB.sts.runMode = "对数";
+  VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span + 1);
+  // VFDB.lgrm.strt = VFDB.lgrm.strt - 1;
+  //VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
+  VFDB.lgrm.tm /= 2;
   VFDB.lgrm.loop *= 2;
+  swtchs = runLoga;
   run();
-  res.send('ok');
-  res.end;
+  res.end(VFDB.sts.runMode);
 });
 
 
 app.get('/runLinear', (req, res) => {
+  rldConf();
+  VFDB.sts.runMode = "线性";
+  VFDB.linear.tm /= 2;
   VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
   VFDB.linear.loop *= 2;
   VFDB.linear.rstrt = VFDB.linear.strt;
   swtchs = runLinear;
   run();
-  res.send('ok');
-  res.end;
+  res.end(VFDB.sts.runMode);
 });
 
 app.post('/saveConf',(req,res)=>{
   let data = JSON.stringify(req.body);
-  fs.writeFile('./client/VFD-B.json',data,'utf8',(cb)=>{
-    VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
+  //console.log(req.body);
+  //console.log(data);
+  
+  fs.writeFile('./client/VFD-B.json',data,'utf8',(err)=>{
+    if(!err){
+      res.end('更新成功');
+    }else{
+      res.end('更新失败，请再更新一次或联系供应商');
+    }
+    //VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
+    rldConf();
   });
-  res.send('ok');
-  res.end;
 });
 
 app.listen(8888);
@@ -336,11 +375,37 @@ WebSocket
 let wss = new WebSocketServer({
   port: 8887
 });
+/*
+wss.on('error',()=>{
+  wss = new WebSocketServer({
+    port: 8887
+  });
+  console.log('websocket error');
+});
+*/
 
-wss.on('error',()=>{console.log('websocket error')});
+wss.on('error',function error(err){
+  console.log('we error');
+});
 
 function sendsts() {
   wss.clients.forEach((conn) => {
+    try{
     conn.send(JSON.stringify(VFDB.sts));
+    }
+    catch (e){
+      console.log(e);
+    }
   });
 }
+
+
+/*
+process.on('uncaughtException', function (err) {
+  console.log(err);
+});
+
+,function ack(err){
+      console.log(err);
+    });
+*/ 
