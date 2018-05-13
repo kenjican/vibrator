@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8">
   <meta lang="zh">
@@ -9,24 +8,15 @@
   <link rel="stylesheet" href="./client/jquery-ui.min.css">
   <link rel="stylesheet" href="./client/bootstrap.min.css">
   <link id="sheet" rel="stylesheet" href="./client/light.css">
- 
-<!--   <script src="./client/jquery-3.3.1.min.js"></script>
-  <script src="./client/jquery-ui.min.js"></script>
-  <script src="./client/popper.js"></script>
-  <script src="./client/bootstrap.min.js"></script>
-  <script src="./client/echarts.js"></script>
-  <script src="./client/Ecalendar.jquery.min.js"></script>
-  <script src="./client/VFDB.js"></script>
-  <script src="./client/mindmup-editabletable.js"></script>
-  <script src="./client/number-input.js"></script> -->
 </head>
 
 <body>
   <div id="HzBarC"></div>
+  <!--
   <table id="dashboard">
     <thead>
     <tr>
-      <td>目前频率</td>
+      <td><span class="label" id="stsLight">停止</span></td>
       <td>规定振幅Z</td>
       <td>测试时间</td>
       <td>剩余时间</td>
@@ -34,7 +24,14 @@
       <td>扫频次数</td>
       <td>起始频率</td>
       <td>终止频率</td>
-      <td>运转模式</td>
+      <td><select id="ssS">
+          <option value="./client/dark.css">灰阶</option>
+          <option value="./client/light.css" selected="selected">白底</option>
+          <option value="./client/wechat.css">微信</option>
+          <option value="./client/tech.css">荧光</option>
+          <option value="./client/blue.css">蓝色</option>
+          <option value="./client/rose.css">红色</option>
+        </select></td>
     </tr>
   </thead>
   <tbody>
@@ -51,21 +48,74 @@
     </tr>
   </tbody>
   </table>
-
-  <select id="ssS">
-    <option value="./client/dark.css">灰阶</option>
-    <option value="./client/light.css" selected="selected">白底</option>
-    <option value="./client/wechat.css">微信</option>
-    <option value="./client/tech.css">荧光</option>
-    <option value="./client/blue.css">蓝色</option>
-    <option value="./client/rose.css">红色</option>
-  </select>
-  <span class="label" id="stsLight">停止</span>
+-->
+<!--
+main menu
+-->
+  <div class="dropup" id="menuBtn">
+    <button class="dropbtn">Menu</button>
+    <div class="dropup-content">
+      <ul>
+        <li data-toggle="modal" data-target="#opModal">操作</li>
+        <li data-toggle="modal" data-target="#confModal">设定</li>
+      </ul>
+    </div>
+  </div>
+<!--
+status cards
+-->
+  <div class="container" style="display:inline-block;">
+     <div class="card-deck"  id="dashboard">
+      <div class="card bg-primary">
+        <div class="card-body text-center">
+          <table id="time-table">
+            <tr><th>开始</th><td></td></tr>
+            <tr><th>结束</th><td></td></tr>
+            <tr><th>总时长</th><td></td></tr>
+            <tr><th>频率</th><td></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card bg-info">
+        <div class="card-body text-center">
+            <table id="opMode-table">
+                <tr><th>振动模式</th><td></td></tr>
+                <tr><th>起始/终止频率</th><td></td></tr>
+                <tr><th></th><td></td></tr>
+                <tr><th>目前/总循环数</th><td></td></tr>
+                <tr><th></th><td></td></tr>
+                <tr><th>目前阶数</th><td></td></tr>
+              </table>
+        </div>
+      </div>
+      <div class="card bg-success">
+        <div class="card-body text-center">
+            <table id="exp-table">
+                <tr><th>试验名称: </th><td></td></tr>
+                <tr><th>产品名称: </th><td></td></tr>
+                <tr><th>序号: </th><td></td></tr>
+              </table>
+        </div>
+      </div>
+      <div class="card bg-danger">
+        <div class='card-header' style="text-align:center;">备注</div>
+          <div class="card-body text-center" id="memo-table">
+            <p class="card-text"></p>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+  <!--
   <div id="ctrlBtn" class="float-right">
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rptModal">报表</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confModal">设定</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#opModal">操作</button>
   </div>
+-->
+<!--
+configuration modal
+-->
   <div class="modal fade in" id="confModal" tabindex="-1" role="dialog" aria-labelledby="confModal" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -207,7 +257,9 @@
       </div>
     </div>
   </div>
-
+<!--
+Operation modal
+-->
   <div class="modal fade in" id="opModal" tabindex="-1" role="dialog" aria-labelledby="opModal" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -231,16 +283,16 @@
             <button type="button" id="stpup">递增</button>
             <button type="button" value="设频率" id="setSV" class="setB">setSV</button>
             <br>
-            <label class="opL">
+            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
               <input type="radio" name="opMode" value="/runFix" checked="checked">定频</input>
             </label>
-            <label class="opL">
+            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
               <input type="radio" name="opMode" value="/runLoga">对数</input>
             </label>
-            <label class="opL">
+            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
               <input type="radio" name="opMode" value="/runLinear">线性</input>
             </label>
-            <label class="opL">
+            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
               <input type="radio" name="opMode" value="/runStps">多阶</input>
             </label>
           </div>

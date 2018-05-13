@@ -19,6 +19,7 @@ function rcws() {
   socket = new WebSocket('ws://' + window.location.hostname + ':8887');
   socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
+    $('#time-table tr td')[3].innerText = a.SV;
     $("#SDT").text(a.DT);
     $("#HzPV").text(a.PV);
     $("#HzSV").text(a.SV);
@@ -74,7 +75,7 @@ function rcws() {
 
 function run() {
   $.get($('input[name=opMode]:checked').val(),(data)=>{
-    $('#dashboard tbody tr td')[1].innerText = data;
+    $('#opMode-table tbody tr td')[0].innerText = data;
   });
 }
 
@@ -225,13 +226,13 @@ $(function () {
   });
 
   $.getJSON('./client/VFD-B.json', (data) => {
-    let a = document.getElementById('mmtable');
+    let a = $('#mmtable tbody');
     testD = data;
     for (let i = 0; i < testD.stps.mltLvl.length; i++) {
-      a.children[1].insertAdjacentHTML('beforeEnd', '<tr><th>' + (a.children[1].children.length + 1) + '</th><td></td><td></td><td></td></tr>');
-      a.children[1].children[i].children[1].innerText = testD.stps.mltLvl[i][0];
-      a.children[1].children[i].children[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
-      a.children[1].children[i].children[3].innerText = testD.stps.mltLvl[i][1] % 60;
+      a.append('<tr><th>' + (i + 1) + '</th><td></td><td></td><td></td></tr>');
+      a[0].rows[i].cells[1].innerText = testD.stps.mltLvl[i][0];
+      a[0].rows[i].cells[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
+      a[0].rows[i].cells[3].innerText = testD.stps.mltLvl[i][1] % 60;
     }
     $('#stpsloop').val(testD.stps.loop);
     $('#mmtable').editableTableWidget();
@@ -257,6 +258,13 @@ $(function () {
     a[2].innerText = testD.expInfo.prdSn;
     a[3].innerText = testD.expInfo.memo;
     $('#general-table').editableTableWidget();
+    $('#exp-table tr td')[0].innerText = testD.expInfo.expName;
+    $('#exp-table tr td')[1].innerText = testD.expInfo.prdName;
+    $('#exp-table tr td')[2].innerText = testD.expInfo.prdSn;
+    $('#exp-table tr td')[0].innerText = testD.expInfo.expName;
+    $('#memo-table p')[0].innerText = testD.expInfo.memo;
+
+    updtTooltip();
   });
 
   $.getJSON('./client/echarts.json', (data) => {
@@ -374,4 +382,18 @@ $(function () {
     handle: ".modal-header"
   })
 
+  $('#menuBtn').draggable();
+
+  function updtTooltip(){
+    $('.opL:eq(1)').attr('data-original-title', $('#log-table').html())
+    $('.opL:eq(2)').attr('data-original-title', $('#linear-table').html());
+    $('.opL:eq(3)').attr('data-original-title', $('#mmtable').html())
+  }
+
+
+
+
+  $(function(){
+    $("[data-toggle='tooltip']").tooltip();
+  });
 });
