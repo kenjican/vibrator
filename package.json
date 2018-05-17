@@ -4,7 +4,8 @@
   "description": "VFDB integration",
   "main": "VFD-B.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "node --nolazy --inspect-brk=5858 mysql.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/kenjican/vibrator/issues"
   },
-  "homepage": "https://github.com/kenjican/vibrator#readme"
+  "homepage": "https://github.com/kenjican/vibrator#readme",
+  "dependencies": {
+    "express-generator": "^4.16.0"
+  }
 }

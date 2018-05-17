@@ -19,7 +19,8 @@ $.fn.numericInputExample = function() {
       footer.children()[2].innerHTML = parseInt(footer.children()[2].innerHTML) + parseInt(footer.children()[3].innerHTML/60);
       footer.children()[3].innerHTML = footer.children()[3].innerHTML % 60;
     };
-  element.find('td').on('focusout', function(evt) {
+  element.find('td').on('change', function(evt) {
+    console.log('td changed called')
     initialTotal();
     /*
     var cell = $(this),
