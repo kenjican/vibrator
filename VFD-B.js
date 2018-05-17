@@ -8,7 +8,7 @@ const Readline = SP.parsers.Readline;
 const express = require('express');
 const app = express();
 const http = require('http');
-
+let vfdbStatus = {};
 /*
 functions for switch
 */
@@ -128,6 +128,7 @@ Steps logic and functions
 function runStps() {
   if (VFDB.stps.lvlPointer == VFDB.stps.mltLvl.length) {
     VFDB.stps.loopPointer += 1;
+    VFDB.sts.loStp[0] = VFDB.stps.loopPointer
     if (VFDB.stps.loopPointer != VFDB.stps.loop) {
       VFDB.stps.lvlPointer = 0;
     } else {
@@ -140,6 +141,7 @@ function runStps() {
   setSV(VFDB.stps.mltLvl[VFDB.stps.lvlPointer][0]);
   t2 = setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 60000);
   VFDB.stps.lvlPointer += 1;
+  VFDB.sts.loStp[1] = VFDB.stps.lvlPointer ;
 }
 
 /*
@@ -152,6 +154,7 @@ function runLoga() {
   VFDB.lgrm.lcount += VFDB.lgrm.drc;
   if ((VFDB.lgrm.lcount == VFDB.lgrm.tm) || (VFDB.lgrm.lcount == 0)) {
     VFDB.lgrm.loop -= 1;
+    VFDB.sts.loStp = [VFDB.lgrm.loop];
     if (VFDB.lgrm.loop == 0) {
       //swtchs = noinsSql;
       //swtchSql = noinsSql;
@@ -171,6 +174,7 @@ Linear logic and function
 function runLinear() {
   if (VFDB.linear.lcount == VFDB.linear.tm) {
     VFDB.linear.loop -= 1;
+    VFDB.sts.loStp =  [VFDB.linear.loop];
     VFDB.linear.Arith *= -1;
     if (VFDB.linear.loop == 0) {
       //swtchSql = noinsSql;
@@ -208,6 +212,7 @@ function run(){
   sql = encodeURIComponent(sql);
   http.get('http://localhost:8889/sql/' + sql ,(res) => {}).on('error',(e)=>{
     console.error(e);
+    return;
   });
 }
 
@@ -292,23 +297,53 @@ app.get('/test/:cmd', function(req, res) {
 });
 
 app.get('/runFix',(req,res)=>{
-  VFDB.sts.runMode = "定频";
+  let a = new Date();
+  vfdbStatus.strtTime = a.toLocaleString();
+  vfdbStatus.endTime = "";
+  vfdbStatus.Ttm = "";
+  vfdbStatus.runMode = "定频";
+  vfdbStatus
   run();
-  res.end(VFDB.sts.runMode);
+  res.end(JSON.stringify(vfdbStatus));
 })
 
 app.get('/runStps', function(req, res) {
   rldConf();
+  let a = new Date();
+  let b = new Date();
+  let Ttm = VFDB.stps.tm * VFDB.stps.loop;
+  b.setMinutes(a.getMinutes() + Ttm);
+  vfdbStatus.strtTime = a.toLocaleString();
+  vfdbStatus.endTime = b.toLocaleString();
+  vfdbStatus.Ttm = Ttm;
+  vfdbStatus.runMode = "多阶";
+  vfdbStatus.strtHz = VFDB.stps.mltLvl[0][0];
+  vfdbStatus.endHz = VFDB.stps.mltLvl[VFDB.stps.mltLvl.length - 1][0];
+  vfdbStatus.loops = VFDB.stps.loop;
+  vfdbStatus.lvls = VFDB.stps.mltLvl.length;
+
   VFDB.stps.lvlPointer = 0;
-  VFDB.sts.runMode = "多阶";
+  VFDB.sts.loStp = [0,0];
   setSV(0);
   run();
   runStps();
-  res.end(VFDB.sts.runMode);
+  res.end(JSON.stringify(vfdbStatus));
 });
 
 app.get('/runLoga', function(req, res) {
   rldConf();
+  let a = new Date();
+  let b = new Date();
+  let Ttm = VFDB.lgrm.tm * VFDB.lgrm.loop;
+  b.setMinutes(a.getMinutes() + Ttm);
+  vfdbStatus.strtTime = a.toLocaleString();
+  vfdbStatus.endTime = b.toLocaleString();
+  vfdbStatus.Ttm = Ttm;
+  vfdbStatus.runMode = "对数";
+  vfdbStatus.strtHz = VFDB.lgrm.strt;
+  vfdbStatus.endHz = VFDB.lgrm.end;
+  vfdbStatus.loops = VFDB.lgrm.loop;
+
   if(VFDB.lgrm.strt > VFDB.lgrm.end){
     VFDB.lgrm.k = -1;
     VFDB.lgrm.strt += 1;
@@ -316,30 +351,39 @@ app.get('/runLoga', function(req, res) {
     VFDB.lgrm.k = 1;
     VFDB.lgrm.strt -= 1;
   }
-  //VFDB.lgrm.lcount = 0;
-  //VFDB.lgrm.strt > VFDB.lgrm.end ? VFDB.lgrm.k = -1; VFDB.lgrm.strt++: VFDB.lgrm.k = 1 VFDB.lgrm.strt--;
-  VFDB.sts.runMode = "对数";
   VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span + 1);
-  // VFDB.lgrm.strt = VFDB.lgrm.strt - 1;
-  //VFDB.lgrm.log10 = Math.log10(VFDB.lgrm.span);
-  VFDB.lgrm.tm /= 2;
+  VFDB.lgrm.tm = VFDB.lgrm.tm * 60 / 2;
   VFDB.lgrm.loop *= 2;
+  VFDB.sts.loStp = [VFDB.lgrm.loop];
   swtchs = runLoga;
   run();
-  res.end(VFDB.sts.runMode);
+ 
+  res.end(JSON.stringify(vfdbStatus));
 });
 
 
 app.get('/runLinear', (req, res) => {
   rldConf();
-  VFDB.sts.runMode = "线性";
-  VFDB.linear.tm /= 2;
+  let a = new Date();
+  let b = new Date();
+  let Ttm = VFDB.linear.tm * VFDB.linear.loop;
+  b.setMinutes(a.getMinutes() + Ttm);
+  vfdbStatus.strtTime = a.toLocaleString();
+  vfdbStatus.endTime = b.toLocaleString();
+  vfdbStatus.Ttm = Ttm;
+  vfdbStatus.runMode = "线性";
+  vfdbStatus.strtHz = VFDB.linear.strt;
+  vfdbStatus.endHz = VFDB.linear.end;
+  vfdbStatus.loops = VFDB.linear.loop;
+
+  VFDB.linear.tm = VFDB.linear.tm * 60 / 2;
   VFDB.linear.Arith = (VFDB.linear.end - VFDB.linear.strt) / VFDB.linear.tm;
   VFDB.linear.loop *= 2;
   VFDB.linear.rstrt = VFDB.linear.strt;
+  VFDB.sts.loStp = [VFDB.linear.loop]
   swtchs = runLinear;
   run();
-  res.end(VFDB.sts.runMode);
+  res.end(JSON.stringify(vfdbStatus));
 });
 
 app.post('/saveConf',(req,res)=>{
@@ -356,6 +400,10 @@ app.post('/saveConf',(req,res)=>{
     //VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
     rldConf();
   });
+});
+
+app.get('/getStts',(req,res)=>{
+  res.end(JSON.stringify(vfdbStatus));
 });
 
 app.listen(8888);

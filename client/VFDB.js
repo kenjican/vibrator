@@ -1,5 +1,3 @@
-//const xmlhttp = new XMLHttpRequest();
-//let socket = new WebSocket('ws://' + window.location.hostname + ':8887');
 let socket;
 let HzBarC;
 let t1 = 0;
@@ -9,25 +7,34 @@ let DT = [],
 let testD;
 let echartOption = {};
 /*
-xmlhttp.onreadystatechange = function () {
-  if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-    console.log(xmlhttp.response);
-  }
+Websocket switch for different run mode
+*/
+const wsSweep = (loStp) => {
+  let a = $('#opMode-table tbody tr td')[8].innerText - Math.ceil(loStp[0] / 2) + 1;
+  $('#opMode-table tbody tr td')[6].innerText = a;
 };
+
+const wsStps = (loStp) => {
+  $('#opMode-table tbody tr td')[6].innerText = loStp[0] + 1;
+  $('#opMode-table tbody tr td')[9].innerText = loStp[1];
+};
+
+const wsFix = () => { };
+
+let wsSwtch = wsSweep;
+
+/*
+socket reconnection while error or disconect
+websocket onmessage event update status
 */
 function rcws() {
   socket = new WebSocket('ws://' + window.location.hostname + ':8887');
   socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
     $('#time-table tr td')[3].innerText = a.SV;
-    $("#SDT").text(a.DT);
-    $("#HzPV").text(a.PV);
-    $("#HzSV").text(a.SV);
-    $('#dashboard tbody tr td')[0].innerText = a.SV;
-    $('#dashboard tbody tr td')[1].innerText = a.runMode;
-    $("#HzSts").text(a.stts);
+    wsSwtch(a.loStp);
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
-      $('#stsLight').css('background-color','red');
+      $('#stsLight').css('background-color', 'red');
       $('#stsLight').text("运转");
       DT.push(a.DT);
       //PV.push(a.PV);
@@ -48,10 +55,13 @@ function rcws() {
       });
       return;
     }
-    $('#stsLight').css('background-color','green');
+    $('#stsLight').css('background-color', 'green');
     $('#stsLight').text("停止");
   };
-
+  /*
+  websocket onclose event trigger reconnect every 5 seconds
+  onopen clear timer
+  */
   socket.onclose = () => {
     if (!t1) {
       t1 = setInterval(rcws, 5000);
@@ -64,28 +74,93 @@ function rcws() {
       t1 = 0;
     }
   };
-
-  $(window).on('beforeunload',()=>{
+  /*
+  window onclose event trigger websocket close gracefully
+  */
+  $(window).on('beforeunload', () => {
     socket.close();
   });
 
 
 }
-//rcws();
+
+function updtStts(data) {
+  let vfdb = JSON.parse(data);
+  switch (vfdb.runMode) {
+    case '定频':
+      wsSwtch = wsFix;
+      $('#opMode-table tbody tr td')[0].innerText = '定频';
+      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
+      $('#time-table tbody tr td')[1].innerText = "";
+      $('#time-table tbody tr td')[2].innerText = "";
+      $('#opMode-table tbody tr')[1].hidden = true;
+      $('#opMode-table tbody tr')[2].hidden = true;
+      $('#opMode-table tbody tr')[3].hidden = true;
+      break;
+
+    case '对数':
+      wsSwtch = wsSweep;
+      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
+      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
+      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
+      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
+      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
+      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
+      $('#opMode-table tbody tr')[1].hidden = false;
+      $('#opMode-table tbody tr')[2].hidden = false;
+      $('#opMode-table tbody tr')[3].hidden = true;
+      break;
+    case '线性':
+      wsSwtch = wsSweep;
+      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
+      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
+      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
+      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
+      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
+      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
+      $('#opMode-table tbody tr')[1].hidden = false;
+      $('#opMode-table tbody tr')[2].hidden = false;
+      $('#opMode-table tbody tr')[3].hidden = true;
+      break;
+    case '多阶':
+      wsSwtch = wsStps;
+      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
+      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
+      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
+      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
+      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
+      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
+      $('#opMode-table tbody tr td')[11].innerText = vfdb.lvls;
+      $('#opMode-table tbody tr')[1].hidden = false;
+      $('#opMode-table tbody tr')[2].hidden = false;
+      $('#opMode-table tbody tr')[3].hidden = false;
+      break;
+
+    case '外控':
+
+      break;
+    default:
+      $('#opMode-table tbody tr td')[0].innerText = '';
+      break;
+  }
+
+}
+
+
 
 function run() {
-  $.get($('input[name=opMode]:checked').val(),(data)=>{
-    $('#opMode-table tbody tr td')[0].innerText = data;
+  $.get($('input[name=opMode]:checked').val(), (data) => {
+    console.log(data);
+    updtStts(data);
   });
+
 }
 
 function stop() {
   $.get('/stop');
-  /*
-  xmlhttp.open("GET", '/stop', true);
-  xmlhttp.responseType = 'text';
-  xmlhttp.send();
-  */
 }
 
 function LRCchk(cmd) {
@@ -95,7 +170,9 @@ function LRCchk(cmd) {
   lrc = lrc.padStart(2, '0').slice(-2);
   return lrc;
 }
-
+/*
+render echarts history data
+*/
 function parseHis(result) {
   for (let i = 0; i < result.length; i++) {
     DT[i] = new Date(result[i].DateTime).toLocaleString();
@@ -111,7 +188,7 @@ function parseHis(result) {
         name: 'Hz',
         type: 'line',
         step: 'middle',
-        lineStyle:{
+        lineStyle: {
           color: '#454345'
         },
         data: Hz
@@ -122,7 +199,6 @@ function parseHis(result) {
 }
 
 function clearChart() {
-  //location.reload();
   DT = [];
   Hz = [];
   HzBarC.setOption({
@@ -142,6 +218,10 @@ let VFDBcmd;
 $.getJSON('./client/VFDBcmd.json', (data) => {
   VFDBcmd = data;
 });
+
+/*
+function executed immediatly
+*/
 
 $(function () {
   $("#fEC").ECalendar({
@@ -165,23 +245,10 @@ $(function () {
     clearChart();
     run();
   });
-/*
-  $('#testB').bind('click', function () {
-    let a = LRCchk($('#test').val());
-    console.log(a);
-    xmlhttp.open("GET", '/test/:' + $('#test').val() + a, true);
-    xmlhttp.responseType = 'text';
-    xmlhttp.send();
-  });
 
-*/
   $('#stopB').bind('click', function () {
     stop();
-    /*
-    xmlhttp.open("GET", '/stop', true);
-    xmlhttp.responseType = 'text';
-    xmlhttp.send();
-    */
+
   });
 
 
@@ -200,21 +267,8 @@ $(function () {
     cmd += LRCchk(cmd);
     console.log(cmd);
     $.get('/test/' + cmd);
-    /*
-    xmlhttp.open("GET", '/test/' + cmd, true);
-    xmlhttp.responseType = 'text';
-    xmlhttp.send();
-    */
   });
-/*
-  $('#setHzTxt').keyup(function (event) {
-    if (event.keyCode === 13) {
-      xmlhttp.open("GET", '/setHz/' + $('#setHzTxt').val(), true);
-      xmlhttp.responseType = 'text';
-      xmlhttp.send();
-    }
-  });
-*/
+
   $('#stpup').click(() => {
     $('#062001')[0].stepUp(5);
     $('#setSV').click();
@@ -225,6 +279,9 @@ $(function () {
     $('#setSV').click();
   });
 
+  /*
+  initial conf table
+  */
   $.getJSON('./client/VFD-B.json', (data) => {
     let a = $('#mmtable tbody');
     testD = data;
@@ -236,21 +293,25 @@ $(function () {
     }
     $('#stpsloop').val(testD.stps.loop);
     $('#mmtable').editableTableWidget();
-    $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
-
+    // $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
+    a = testD.stps.loop * ($('#mmtable tfoot tr td')[2] * 60 + $('#mmtable tfoot tr td')[3]);
+    $('#mmtable tfoot tr th')[2].innerText = parseInt(testD.stps.tm / 60);
+    $('#mmtable tfoot tr th')[3].innerText = parseInt(testD.stps.tm % 60);
+    //$('#mmtable tfoot tr th')[7].innerText = testD.stps.loop % 60;
     a = $('#linear-table tbody tr td');
 
     a[0].innerText = testD.linear.strt;
     a[1].innerText = testD.linear.end;
     a[2].innerText = testD.linear.loop;
-    a[3].innerText = testD.linear.tm / 60;
+    a[3].innerText = testD.linear.tm;
+    $('#linear-table tfoot tr th')[1].innerText = parseInt(testD.linear.tm * testD.linear.loop / 60) + ' 时' + (testD.linear.tm * testD.linear.loop % 60) + ' 分';
     $('#linear-table').editableTableWidget();
-    
     a = $('#log-table tbody tr td');
     a[0].innerText = testD.lgrm.strt;
     a[1].innerText = testD.lgrm.end;
     a[2].innerText = testD.lgrm.loop;
-    a[3].innerText = testD.lgrm.tm / 60;
+    a[3].innerText = testD.lgrm.tm;
+    $('#log-table tfoot tr th')[1].innerText = parseInt(testD.lgrm.tm * testD.lgrm.loop / 60) + ' 时' + (testD.lgrm.tm * testD.lgrm.loop % 60) + ' 分';
     $('#log-table').editableTableWidget();
     a = $('#general-table tbody tr td')
     a[0].innerText = testD.expInfo.expName;
@@ -262,11 +323,35 @@ $(function () {
     $('#exp-table tr td')[1].innerText = testD.expInfo.prdName;
     $('#exp-table tr td')[2].innerText = testD.expInfo.prdSn;
     $('#exp-table tr td')[0].innerText = testD.expInfo.expName;
-    $('#memo-table p')[0].innerText = testD.expInfo.memo;
-
+    //$('#memo-table p')[0].innerText = testD.expInfo.memo;
+    $('#mmtable tbody tr').find('td').on('change', () => {
+      updtStpTm();
+    });
+    updtStpTm();
     updtTooltip();
   });
 
+  /*
+  calculate the stps single loop and total loop time
+  */
+
+  function updtStpTm() {
+    let total = 0;
+    let a = $('#mmtable tbody tr');
+    for (let i = 0; i < a.length; i++) {
+      total += parseInt(a[i].cells[2].innerText * 60) + parseInt(a[i].cells[3].innerText);
+    }
+    testD.stps.tm = total;
+    $('#mmtable tfoot tr')[0].cells[2].innerText = parseInt(total / 60);
+    $('#mmtable tfoot tr')[0].cells[3].innerText = parseInt(total % 60);
+    $('#mmtable tfoot tr')[1].cells[2].innerText = parseInt(total * $('#stpsloop').val() / 60);
+    $('#mmtable tfoot tr')[1].cells[3].innerText = parseInt(total * $('#stpsloop').val() % 60);
+    updtTooltip();
+  }
+
+  /*
+  initial echarts
+  */
   $.getJSON('./client/echarts.json', (data) => {
     echartOption = data;
     HzBarC.setOption(
@@ -277,15 +362,25 @@ $(function () {
 
   $('#aRow').click(() => {
     $("#mmtable tbody tr:last").after('<tr><th>' + ($("#mmtable tbody tr").length + 1) + '</th><td>0</td><td>0</td><td>0</td></tr>');
-    $('#mmtable').editableTableWidget().numericInputExample();
+    $('#mmtable').editableTableWidget();
+    $('#mmtable tbody tr').find('td').on('change', () => {
+      updtStpTm();
+    });
+    updtStpTm();
   });
 
   $('#dRow').click(() => {
     $('#mmtable tbody tr:last').remove();
-    $('#mmtable').editableTableWidget().numericInputExample();
+    $('#mmtable').editableTableWidget();
+    $('#mmtable tbody tr').find('td').on('change', () => {
+      updtStpTm();
+    });
+    updtStpTm();
     return false;
   });
-
+  /*
+  update conf data to server
+  */
   $('#updt').click(() => {
     let y = [];
 
@@ -304,74 +399,52 @@ $(function () {
     //testD.lgrm.end > testD.lgrm.strt ? testD.lgrm.drc = 1: testD.lgrm.drc = -1;
     testD.lgrm.span = Math.abs(parseInt($('#log-table tbody tr')[0].children[0].innerText - $('#log-table tbody tr')[0].children[1].innerText));
     testD.lgrm.loop = parseInt($('#log-table tbody tr')[0].children[2].innerText);
-    testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText) * 60;
+    testD.lgrm.tm = parseInt($('#log-table tbody tr')[0].children[3].innerText);
     testD.linear.strt = parseInt($('#linear-table tbody tr')[0].children[0].innerText);
     testD.linear.end = parseInt($('#linear-table tbody tr')[0].children[1].innerText);
     testD.linear.loop = parseInt($('#linear-table tbody tr')[0].children[2].innerText);
-    testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText) * 60;
+    testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText);
     testD.expInfo.expName = $('#general-table tbody tr td')[0].innerText;
     testD.expInfo.prdName = $('#general-table tbody tr td')[1].innerText;
     testD.expInfo.prdSn = $('#general-table tbody tr td')[2].innerText;
     testD.expInfo.memo = $('#general-table tbody tr td')[3].innerText;
     let data = JSON.stringify(testD);
     $.ajax({
-      type:'POST',
-      url:'/saveConf',
-      contentType:'application/json',
-      data:data
-    }).done((res)=>{
-      $('#updtAlert').css('display','inline-block');
+      type: 'POST',
+      url: '/saveConf',
+      contentType: 'application/json',
+      data: data
+    }).done((res) => {
+      $('#updtAlert').css('display', 'inline-block');
       $('#updtAlert').html(res);
-      $('#updtAlert').fadeTo(2000,500).slideUp(500,()=>{
+      $('#updtAlert').fadeTo(2000, 500).slideUp(500, () => {
         $('#updtAlert').slideUp(500);
       });
     });
   });
-
+  /*
+  change the css file
+  */
   $("#ssS").change(() => {
     $("#sheet").attr("href", $("#ssS").val());
   });
 
-/*   $('.opL').change(()=>{
-    switch ($('input[name=opMode]:checked').val()){
-      case '/runLoga':{
-        $('#dashboard tbody tr')[0].children[4].innerText = testD.lgrm.tm/60;
-        $('#dashboard tbody tr')[0].children[5].innerText = testD.lgrm.loop;
-        $('#dashboard tbody tr')[0].children[6].innerText = testD.lgrm.strt;
-        $('#dashboard tbody tr')[0].children[7].innerText = testD.lgrm.strt + testD.lgrm.span;
-        $('#dashboard tbody tr')[0].children[8].innerText = '对数扫频';
-        break;
-      }
-
-      case '/runLinear':{
-        $('#dashboard tbody tr')[0].children[4].innerText = testD.linear.tm/60;
-        $('#dashboard tbody tr')[0].children[5].innerText = testD.linear.loop;
-        $('#dashboard tbody tr')[0].children[6].innerText = testD.linear.strt;
-        $('#dashboard tbody tr')[0].children[7].innerText = testD.linear.end;
-        $('#dashboard tbody tr')[0].children[8].innerText = '线性扫频';
-        break;
-      }
-      default:{
-        break;
-      }
-    }
-  });
- */
-
   HzBarC = echarts.init($('#HzBarC')[0]);
-
+  /*
+  update the ongoing data or last experiment data
+  */
   (() => {
     $.get('http://' + window.location.hostname + ':8889/getRT', (result) => {
       parseHis(result);
-    }).fail(()=>{
+    }).fail(() => {
       rcws();
-      alert('数据库断线，无法记录数据，请联系供应商');
+      //alert('数据库断线，无法记录数据，请联系供应商');
     });
-})();
+  })();
 
 
   /*
-  modal draggable
+  modal & menu draggable
   */
 
   $('#opModal').draggable({
@@ -382,18 +455,39 @@ $(function () {
     handle: ".modal-header"
   })
 
-  $('#menuBtn').draggable();
-
-  function updtTooltip(){
+  /*
+  update tooltip content
+  */
+  function updtTooltip() {
     $('.opL:eq(1)').attr('data-original-title', $('#log-table').html())
     $('.opL:eq(2)').attr('data-original-title', $('#linear-table').html());
     $('.opL:eq(3)').attr('data-original-title', $('#mmtable').html())
   }
 
-
-
-
-  $(function(){
+  $(function () {
     $("[data-toggle='tooltip']").tooltip();
   });
+  /*
+  update linear and log execution time
+  */
+  $('#linear-table tbody tr').find('td').on('change', () => {
+    let a = $('#linear-table tbody tr td')[2].innerText * $('#linear-table tbody tr td')[3].innerText;
+    $('#linear-table tfoot th')[1].innerText = parseInt(a / 60) + ' 时' + (a % 60) + ' 分';
+    updtTooltip();
+  });
+
+  $('#log-table tbody tr').find('td').on('change', () => {
+    let a = $('#log-table tbody tr td')[2].innerText * $('#log-table tbody tr td')[3].innerText;
+    $('#log-table tfoot th')[1].innerText = parseInt(a / 60) + ' 时' + (a % 60) + ' 分';
+    updtTooltip();
+  });
+
+  $('#stpsloop').change(() => {
+    console.log('stpsloop changed');
+    updtStpTm();
+  });
+
+  $.get('/getStts', (res) => {
+    updtStts(res);
+  })
 });

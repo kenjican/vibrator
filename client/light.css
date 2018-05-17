@@ -31,11 +31,12 @@ label{
 
 }
 
-/*
-#dashboard div{
-  height:30vh;
+
+.dashboard th{
+  border:none;
+  text-align:left;
 }
-*/
+
 #HzBarC {
   width:1200px;
   height:400px;
@@ -51,15 +52,32 @@ input[type=number]::-webkit-outer-spin-button {
   opacity:1;
 }
 
-#mmtable,#linear-table,#log-table,#general-table{
-  margin:0 auto;
-  width:80%;
+table {
+  width:100%;
+}
+#stpsloop{
+  border:0px;
+  text-align:center;
+}
+.config{
+  margin:0;
+  width:100%;
   height:20%;
   border:3px solid #B0B0B0;
   font-size:1.2rem;
   color:#000;
+  text-align:center;
 }
 
+.config th{
+  width:20%;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{
+  background-color: #007BFF;
+  color:#fff;
+  font-weight:bold;
+}
 
 #ctrlBtn{
   margin-right:10%;
@@ -67,15 +85,15 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .modal-header{
-  background-color: #b0b0b0;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  background-color: #007BFF;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .modal-footer{
-  background-color: #707070;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  background-color: #007BF0;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 #stsLight{
@@ -88,8 +106,8 @@ input[type=number]::-webkit-outer-spin-button {
   background-color: #4CAF50;
   color: white;
   /*padding: 16px;*/
-  font-size: 26px;
-  border-radius: 20%;
+  font-size: 1.7em;
+  border-radius: 5%;
   cursor:pointer;
   /*
   position:fixed;
@@ -106,13 +124,13 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .dropup-content {
-  border-radius:10%;
+  border-radius: 5%;
   display: none;
   position: absolute;
   background-color: #4CAF50;
   min-width: 100%;
-  bottom: 40px;
-  font-size:1.2em;
+  bottom: 45px;
+  font-size:1.5em;
   z-index: 1;
 }
 
@@ -123,9 +141,9 @@ input[type=number]::-webkit-outer-spin-button {
   display: block;
 
 }
-
+/*
 .dropup-content a:hover {background-color: #ccc}
-
+*/
 .dropup:hover .dropup-content {
   display: block;
 }
@@ -148,11 +166,3 @@ li {
   font-size: 1.2em;
 }
 
-table th{
-  border:none;
-  text-align:left;
-}
-
-table td{
-  text-align:right;
-}

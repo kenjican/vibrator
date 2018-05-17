@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta lang="zh">
@@ -13,43 +14,6 @@
 <body>
   <div id="HzBarC"></div>
   <!--
-  <table id="dashboard">
-    <thead>
-    <tr>
-      <td><span class="label" id="stsLight">停止</span></td>
-      <td>规定振幅Z</td>
-      <td>测试时间</td>
-      <td>剩余时间</td>
-      <td>扫频时间</td>
-      <td>扫频次数</td>
-      <td>起始频率</td>
-      <td>终止频率</td>
-      <td><select id="ssS">
-          <option value="./client/dark.css">灰阶</option>
-          <option value="./client/light.css" selected="selected">白底</option>
-          <option value="./client/wechat.css">微信</option>
-          <option value="./client/tech.css">荧光</option>
-          <option value="./client/blue.css">蓝色</option>
-          <option value="./client/rose.css">红色</option>
-        </select></td>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>0</td>
-      <td>2mm</td>
-      <td>15HR</td>
-      <td>5Hr</td>
-      <td>3HR</td>
-      <td>20</td>
-      <td>10</td>
-      <td>55</td>
-      <td>5</td>
-    </tr>
-  </tbody>
-  </table>
--->
-<!--
 main menu
 -->
   <div class="dropup" id="menuBtn">
@@ -61,264 +25,303 @@ main menu
       </ul>
     </div>
   </div>
-<!--
+  <!--
 status cards
 -->
   <div class="container" style="display:inline-block;">
-     <div class="card-deck"  id="dashboard">
+    <div class="card-deck" id="dashboard">
       <div class="card bg-primary">
         <div class="card-body text-center">
-          <table id="time-table">
-            <tr><th>开始</th><td></td></tr>
-            <tr><th>结束</th><td></td></tr>
-            <tr><th>总时长</th><td></td></tr>
-            <tr><th>频率</th><td></td></tr>
+          <table id="time-table" class="dashboard">
+            <tr>
+              <th>开始</th>
+              <td></td>
+            </tr>
+            <tr>
+              <th>结束</th>
+              <td></td>
+            </tr>
+            <tr>
+              <th>总时长</th>
+              <td></td>
+            </tr>
+            <tr>
+              <th>频率</th>
+              <td></td>
+            </tr>
           </table>
         </div>
       </div>
       <div class="card bg-info">
         <div class="card-body text-center">
-            <table id="opMode-table">
-                <tr><th>振动模式</th><td></td></tr>
-                <tr><th>起始/终止频率</th><td></td></tr>
-                <tr><th></th><td></td></tr>
-                <tr><th>目前/总循环数</th><td></td></tr>
-                <tr><th></th><td></td></tr>
-                <tr><th>目前阶数</th><td></td></tr>
-              </table>
+          <table id="opMode-table" class="dashboard">
+            <tr>
+              <th>振动模式</th>
+              <td></td>
+              <td colspan="2">
+                <span class="label" id="stsLight">停止</span>
+              </td>
+              <td></td>
+              </td>
+            </tr>
+            <tr>
+              <th>起始/终止频率</th>
+              <td></td>
+              <td> / </td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>目前/总循环数</th>
+              <td></td>
+              <td> / </td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>目前/总阶数</th>
+              <td></td>
+              <td> / </td>
+              <td></td>
+            </tr>
+          </table>
         </div>
       </div>
       <div class="card bg-success">
         <div class="card-body text-center">
-            <table id="exp-table">
-                <tr><th>试验名称: </th><td></td></tr>
-                <tr><th>产品名称: </th><td></td></tr>
-                <tr><th>序号: </th><td></td></tr>
-              </table>
+          <table id="exp-table" class="dashboard">
+            <tr>
+              <th>试验名称: </th>
+              <td></td>
+            </tr>
+            <tr>
+              <th>产品名称: </th>
+              <td></td>
+            </tr>
+            <tr>
+              <th>序号: </th>
+              <td></td>
+            </tr>
+          </table>
         </div>
       </div>
-      <div class="card bg-danger">
-        <div class='card-header' style="text-align:center;">备注</div>
-          <div class="card-body text-center" id="memo-table">
-            <p class="card-text"></p>
-          </div>
-        </div>
     </div>
-  </div>
-  
-  <!--
-  <div id="ctrlBtn" class="float-right">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rptModal">报表</button>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confModal">设定</button>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#opModal">操作</button>
-  </div>
--->
-<!--
+    <!--
 configuration modal
 -->
-  <div class="modal fade in" id="confModal" tabindex="-1" role="dialog" aria-labelledby="confModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5>
-            <div class="alert alert-error hide">上限是100</div>
-          </h5>
-        </div>
-        <div class="modal-body">
-          <div id="updtAlert" class="alert alert-success" style="display:none"></div>
-          <ul class="nav nav-tabs" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link active" data-toggle="tab" href="#tab-mltLvl">多阶</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#tab-linear">线性</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#tab-log">对数</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#tab-general">设定</a>
-            </li>
-          </ul>
-          <div class="tab-content">
+    <div class="modal fade in" id="confModal" tabindex="-1" role="dialog" aria-labelledby="confModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+          </div>
+          <div class="modal-body">
+            <div id="updtAlert" class="alert alert-success" style="display:none"></div>
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#tab-mltLvl">多阶</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab-linear">线性</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab-log">对数</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tab-general">设定</a>
+              </li>
+            </ul>
+            <div class="tab-content">
 
-            <div id="tab-mltLvl" class="container tab-pane active">
-              <table id="mmtable">
-                <thead>
-                  <tr>
-                    <th>阶数</th>
-                    <th>HZ</th>
-                    <th>时</th>
-                    <th>分</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div id="tab-mltLvl" class="container tab-pane active">
+                <table id="mmtable" class="config">
+                  <thead>
+                    <tr>
+                      <th>阶数</th>
+                      <th>HZ</th>
+                      <th>时</th>
+                      <th>分</th>
+                    </tr>
+                  </thead>
+                  <tbody>
 
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <th>总时长</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </tfoot>
-              </table>
-              <label>循环次数</label>
-              <input type="number" value="1" min="1" max="100" id="stpsloop">
-              <button type="button" class="btn btn-primary" id="dRow">删除</button>
-              <button type="button" class="btn btn-primary" id="aRow">新增</button>
-            </div>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>单循环时间</th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                    <tr>
+                      <th>总时间</th>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                    <tr>
+                      <th>循环次数</th>
+                      <th>
+                        <input type="number" value="1" min="1" max="100" id="stpsloop">
+                      </th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </tfoot>
+                </table>
+                <button type="button" class="btn btn-primary" id="dRow">删除</button>
+                <button type="button" class="btn btn-primary" id="aRow">新增</button>
 
-            <div id="tab-linear" class="container tab-pane fade">
-              <table id="linear-table">
-                <thead>
-                  <th>
-                    起始频率
-                  </th>
-                  <th>终止频率</th>
-                  <th>扫描次数</th>
-                  <th>扫描时间</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                </tbody>
-                <tfoot>
-                  <th>
-                    总时间
-                  </th>
-                  <tr>
+              </div>
 
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            <div id="tab-log" class="tab-pane fade">
-              <table id="log-table">
-                <thead>
-                  <th>
-                    起始频率
-                  </th>
-                  <th>终止频率</th>
-                  <th>扫描次数</th>
-                  <th>扫描时间</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                </tbody>
-                <tfoot>
-                  <th>
-                    总时间
-                  </th>
-                  <tr>
-
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-            <div id="tab-general" class="tab-pane fade">
-              <table id="general-table">
-                <thead>
-                  <th>
-                    实验名称
-                  </th>
-                  <th>产品名称</th>
-                  <th>产品序号</th>
-                  <th>备注</th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                </tbody>
-                <tfoot>
-                </tfoot>
-              </table>
+              <div id="tab-linear" class="container tab-pane fade">
+                <table id="linear-table" class="config">
+                  <thead>
+                    <th>
+                      起始频率
+                    </th>
+                    <th>终止频率</th>
+                    <th>扫描次数</th>
+                    <th>扫描时间</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>
+                        总时间
+                      </th>
+                      <th>
+                      </th>
+                      <th>
+                      </th>
+                      <th>
+                      </th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div id="tab-log" class="tab-pane fade">
+                <table id="log-table" class="config">
+                  <thead>
+                    <th>
+                      起始频率
+                    </th>
+                    <th>终止频率</th>
+                    <th>扫描次数</th>
+                    <th>扫描时间</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>
+                        总时间
+                      </th>
+                      <th>
+                      </th>
+                      </th>
+                      <th>
+                      </th>
+                      <th>
+                      </th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div id="tab-general" class="tab-pane fade">
+                <table id="general-table" class="config">
+                  <thead>
+                    <th>
+                      实验名称
+                    </th>
+                    <th>产品名称</th>
+                    <th>产品序号</th>
+                    <th>备注</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="updt">更新</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="updt">更新</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-<!--
+    <!--
 Operation modal
 -->
-  <div class="modal fade in" id="opModal" tabindex="-1" role="dialog" aria-labelledby="opModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5>put the paginaton herer</h5>
-        </div>
-        <div class="modal-body">
-          <!--
-          <label id="HzPV">0</label>
-          <label id="HzSV">0</label>
+    <div class="modal fade in" id="opModal" tabindex="-1" role="dialog" aria-labelledby="opModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
 
-          <label id="HzSts">HzSts</label>
-          <label id="SDT">datetime</label>
-          <br>
-          -->
-          <div id="ctrlboard">
-            <button type="button" value="run" id="runB">run</button>
-            <button type="button" value="stop" id="stopB">stop</button>
-            <button type="button" id="stpdown">递减</button>
-            <input type="number" value="0" id="062001" min="0" max="100"></input>
-            <button type="button" id="stpup">递增</button>
-            <button type="button" value="设频率" id="setSV" class="setB">setSV</button>
-            <br>
-            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
-              <input type="radio" name="opMode" value="/runFix" checked="checked">定频</input>
-            </label>
-            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
-              <input type="radio" name="opMode" value="/runLoga">对数</input>
-            </label>
-            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
-              <input type="radio" name="opMode" value="/runLinear">线性</input>
-            </label>
-            <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
-              <input type="radio" name="opMode" value="/runStps">多阶</input>
-            </label>
           </div>
-          <div class="calendarWarp">
-            <input type="text" name="date" class="ECalendar" id="fEC">TO
-            <input type="text" name="tdate" class="ECalendar" id="tEC">
-            <input type="button" value="历史曲线" id="getHisB"></input>
-          </div>
+          <div class="modal-body">
+            <div id="ctrlboard">
+              <button type="button" value="run" id="runB">run</button>
+              <button type="button" value="stop" id="stopB">stop</button>
+              <button type="button" id="stpdown">递减</button>
+              <input type="number" value="0" id="062001" min="0" max="100">
+              <button type="button" id="stpup">递增</button>
+              <button type="button" value="设频率" id="setSV" class="setB">setSV</button>
+              <br>
+              <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
+                <input type="radio" name="opMode" value="/runFix" checked="checked">定频</input>
+              </label>
+              <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
+                <input type="radio" name="opMode" value="/runLoga">对数</input>
+              </label>
+              <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
+                <input type="radio" name="opMode" value="/runLinear">线性</input>
+              </label>
+              <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
+                <input type="radio" name="opMode" value="/runStps">多阶</input>
+              </label>
+            </div>
+            <div class="calendarWarp">
+              <input type="text" name="date" class="ECalendar" id="fEC">TO
+              <input type="text" name="tdate" class="ECalendar" id="tEC">
+              <input type="button" value="历史曲线" id="getHisB"></input>
+            </div>
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="./client/jquery-3.3.1.min.js"></script>
-  <script src="./client/jquery-ui.min.js"></script>
-  <script src="./client/popper.js"></script>
-  <script src="./client/bootstrap.min.js"></script>
-  <script src="./client/echarts.js"></script>
-  <script src="./client/Ecalendar.jquery.min.js"></script>
-  <script src="./client/VFDB.js"></script>
-  <script src="./client/mindmup-editabletable.js"></script>
-  <script src="./client/number-input.js"></script>
+    <script src="./client/jquery-3.3.1.min.js"></script>
+    <script src="./client/jquery-ui.min.js"></script>
+    <script src="./client/popper.js"></script>
+    <script src="./client/bootstrap.min.js"></script>
+    <script src="./client/echarts.js"></script>
+    <script src="./client/Ecalendar.jquery.min.js"></script>
+    <script src="./client/VFDB.js"></script>
+    <script src="./client/mindmup-editabletable.js"></script>
 
 </body>
 
