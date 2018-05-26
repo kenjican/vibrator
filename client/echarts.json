@@ -1,86 +1,85 @@
 {
-    "default": {
-        "title": {
-            "text": "昆山振弘检测设备有限公司",
-            "link":"http://www.ks-talents.com",
-            "target":"blank",
-            "textStyle":{
-            "color":"#02468F"
-            }
-        },
-        "legend": {
-            "data": [
-                "Hz"
-            ]
-        },
-        "tooltip": {
-            "trigger": "axis"
-        },
-        "toolbox": {
-            "show": "true",
-            "feature": {
-                "dataView": {
-                    "readOnly": false
-                },
-                "restore": {
-                    "show": true
-                },
-                "saveAsImage": {
-                    "show": true
-                }
-            },
-            "iconStyle":{
-                "borderColor":"#02468F"
-            },
-            "emphasis":{
-                "borderColor":"#FF5702"
-            }
-
-        },
-        "dataZoom": [
-            {
-                "type": "slider",
-                "xAxisIndex": 0,
-                "start": 0,
-                "end": 100
-            }
+  "default": {
+      "legend": {
+        "data": [
+          "Hz"
         ],
-        "xAxis": {
-            "data": []
+        "top":"0%"
+      },
+      "tooltip": {
+        "trigger": "axis"
+      },
+      "grid":[
+        {"x":"7%","y":"5%","width":"88%"}
+      ],
+      "toolbox": {
+        "show": "true",
+        "feature": {
+          "dataView": {
+            "readOnly": false
+          },
+          "restore": {
+            "show": true
+          },
+          "saveAsImage": {
+            "show": true
+          }
         },
-        "yAxis": [
-            {
-                "type": "value",
-                "name": "Hz",
-                "min": 0,
-                "max": 100,
-                "maxInterval": 10,
-                "position": "left",
-                "axisLabel": {
-                    "formatter": "{value} Hz",
-                    "textStyle": {
-                        "color": "#ff715e"
-                    }
-                }
+        "iconStyle": {
+          "borderColor": "#02468F"
+        },
+        "emphasis": {
+          "borderColor": "#FF5702"
+        },
+        "top":"0%",
+        "right":"10%"
+      },
+      "dataZoom": [
+        {
+          "type": "slider",
+          "xAxisIndex": 0,
+          "start": 0,
+          "end": 100,
+          "right":10,
+          "left":50
+        }
+      ],
+      "xAxis": {
+        "data": []
+      },
+      "yAxis": [
+        {
+          "type": "value",
+          "name": "Hz",
+          "min": 0,
+          "max": 100,
+          "maxInterval": 10,
+          "position": "left",
+          "axisLabel": {
+            "formatter": "{value} Hz",
+            "textStyle": {
+              "color": "#ff715e"
             }
-        ],
-        "series": [
-            {
-                "name": "PV",
-                "type": "line",
-                "data": []
-            },
-            {
-                "name": "Hz",
-                "type": "line",
-                "step": "middle",
-                "itemStyle": {
-                    "normal": {
-                        "color": "#ff715e"
-                    }
-                },
-                "data": []
+          }
+        }
+      ],
+      "series": [
+        {
+          "name": "PV",
+          "type": "line",
+          "data": []
+        },
+        {
+          "name": "Hz",
+          "type": "line",
+          "step": "middle",
+          "itemStyle": {
+            "normal": {
+              "color": "#ff715e"
             }
-        ]
+          },
+          "data": []
+        }
+      ]
     }
-}
+  }

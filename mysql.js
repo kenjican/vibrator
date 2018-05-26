@@ -1,9 +1,25 @@
+/*
+mysql setup
+*/
 const express = require('express');
 const app = express();
 const fs = require('fs');
 const mysql = require('mysql');
 const DB = JSON.parse(fs.readFileSync('./mysql.json'));
-DB.con.table = new Date().toLocaleString('en-us',{month:'short'});//
+DB.con.table = new Date().toLocaleString('en-us',{month:'short'});
+DB.con.database = new Date().getFullYear();
+
+/*
+AliSMS
+*/
+const SMS = JSON.parse(fs.readFileSync('./SMS.json'));
+const smsClient = require('@alicloud/sms-sdk');
+//const accessKeyId = 'LTAIEqmkzUi4as1h';
+//const secretAccessKey = 'OodMx1qkUkYD5Mq5QjV09eqdrSZs20';
+//let smsC = new smsClient({accessKeyId,secretAccessKey});
+let smsC = new smsClient(SMS.auth);
+
+
 /*
 Mysql
 */
@@ -47,7 +63,7 @@ app.get('/insert/:sts', (req, res) => {
 
 app.get('/getHis/:fDate/:tDate', (req, res) => {
   let sql = `select DateTime,PV,SV from May where DateTime between '${req.params.fDate}' and '${req.params.tDate})'`;// and (id mod 5 = 0)`;
-  con.query(sql, (err, result, fields) => {
+  con.query(sql, (err, result) => {
     if (err) throw err;
     res.send(result);
   });
@@ -83,7 +99,7 @@ app.get('/getRT', (req, res) => {
 
 app.get('/sql/:cmd', (req, res) => {
   //console.log(req.params.cmd);
-  con.query(req.params.cmd, (err, result) => {
+  con.query(req.params.cmd, (err) => {
     if (err) throw err;
   });
   res.send('ok');
@@ -93,4 +109,18 @@ app.get('/', (req, res) => {
   res.send('OF');
   res.end;
 });
+
+app.get('/sms/:smsParam',(req,res)=>{
+  //let a = JSON.parse(req.params.smsParam);
+  //SMS.msgs.TemplateParam = '{"expName":"更改试验名称","strtTime":"2018-May-18 11:00","endTime":"2018-May-18 13:00","proName":"小米手机电池","proSn":"1999"}';
+  SMS.msgs.TemplateParam = req.params.smsParam;
+  smsC.sendSMS(
+    SMS.msgs
+  ).then((res)=>{
+      console.log(res);
+  },(err)=>{
+      console.log(err)
+  });  
+})
+
 app.listen(8889);

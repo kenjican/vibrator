@@ -2,9 +2,7 @@
   "con":{
     "host":"localhost",
     "user":"root",
-    "password":"chenjia1!",
-    "database":"2018",
-    "table":"May"
+    "password":"chenjia1!"
   },
 
   "sql":{

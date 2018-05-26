@@ -47,9 +47,14 @@ label{
 }
 
 #HzBarC {
-  widows: 1300px;
-  height:400px;
+  width: 700px;
+  height:530px;
 }
+
+.stts {
+    width:100px;
+}
+
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -189,8 +194,14 @@ li {
   font-size:1.2em;
 }
 
-.nav{
-  padding-left: 30px;
+.navbar{
+  padding:0 50 0 50;
+  height:66px;
+  width:700px;
+}
+
+.navbar >li{
+    width:100px;
 }
 
 .tooltip-inner > table,th,td{

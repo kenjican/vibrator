@@ -13,17 +13,17 @@ let vfdbStatus = {};
 functions for switch
 */
 
-const noinsSql = function() {};
+const noinsSql = function () { };
 let swtchSql = noinsSql;
 let swtchs = noinsSql;
 
-const insSql = function() {
-  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => {}).on('error',(e)=>{
+const insSql = function () {
+  http.get('http://localhost:8889/insert/' + JSON.stringify(VFDB.sts), (res) => { }).on('error', (e) => {
     console.error(`error: ${e.message}`);
   });
 }
 
-let getPSS = function() {
+let getPSS = function () {
   swtchs();
   setQ(VFDB.cmdASCII.getPSS);
 };
@@ -40,7 +40,7 @@ let U1 = new SP('/dev/VFDB', {
   parity: VFDB.con.parity
 });
 
-U1.on('error',(err)=>{
+U1.on('error', (err) => {
   console.log(err + 'VFDB not connected');
 });
 
@@ -48,7 +48,7 @@ let parser = U1.pipe(new Readline({
   delimiter: '\r\n'
 }));
 
-parser.on('data', function(data) {
+parser.on('data', function (data) {
   switch (data.length) {
     case 21:
       VFDB.sts.DT = new Date().toLocaleString();
@@ -57,12 +57,13 @@ parser.on('data', function(data) {
       VFDB.sts.SV = parseInt(data.slice(11, 15), 16) / 100;
       sendsts();
       swtchSql();
-      chkQ();
+      //chkQ();
       break;
     default:
-      chkQ();
+      //chkQ();
       break;
   }
+  chkQ();
 });
 
 
@@ -82,14 +83,14 @@ let parser2 = U2.pipe(new Readline({
   delimiter: '\n'
 }));
 
-parser2.on('data', function(data) {
-  switch (data.slice(0,2)) {
+parser2.on('data', function (data) {
+  switch (data.slice(0, 2)) {
     case '63':
-      setSV(data.slice(2,5));
+      setSV(data.slice(2, 5));
       U2.write('635\r\n');
       break;
     case '62':
-      setSV(data.slice(2,5));
+      setSV(data.slice(2, 5));
       U2.write('624\r\n');
       break;
     case '61':
@@ -123,12 +124,14 @@ function LRCchk(cmd) {
 
 /*
 Steps logic and functions
+1:loStp[loops,steps]
+
 */
 
 function runStps() {
   if (VFDB.stps.lvlPointer == VFDB.stps.mltLvl.length) {
     VFDB.stps.loopPointer += 1;
-    VFDB.sts.loStp[0] = VFDB.stps.loopPointer
+    //VFDB.sts.loStp[0] = VFDB.stps.loopPointer;
     if (VFDB.stps.loopPointer != VFDB.stps.loop) {
       VFDB.stps.lvlPointer = 0;
     } else {
@@ -137,11 +140,12 @@ function runStps() {
       //setSV(0);
       return;
     }
+    VFDB.sts.loStp[0] = VFDB.stps.loopPointer;
   }
   setSV(VFDB.stps.mltLvl[VFDB.stps.lvlPointer][0]);
   t2 = setTimeout(runStps, VFDB.stps.mltLvl[VFDB.stps.lvlPointer][1] * 60000);
   VFDB.stps.lvlPointer += 1;
-  VFDB.sts.loStp[1] = VFDB.stps.lvlPointer ;
+  VFDB.sts.loStp[1] = VFDB.stps.lvlPointer;
 }
 
 /*
@@ -174,7 +178,7 @@ Linear logic and function
 function runLinear() {
   if (VFDB.linear.lcount == VFDB.linear.tm) {
     VFDB.linear.loop -= 1;
-    VFDB.sts.loStp =  [VFDB.linear.loop];
+    VFDB.sts.loStp = [VFDB.linear.loop];
     VFDB.linear.Arith *= -1;
     if (VFDB.linear.loop == 0) {
       //swtchSql = noinsSql;
@@ -205,29 +209,47 @@ function setSV(sv) {
   setQ(sSV);
 }
 
-function run(){
-  swtchSql = insSql;
-  setQ(VFDB.cmdASCII.run);
-  let sql = `insert into schedule (expName,prdName,prdSn,memo) values ('${VFDB.expInfo.expName}','${VFDB.expInfo.prdName}','${VFDB.expInfo.prdSn}','${VFDB.expInfo.memo}')`;
-  sql = encodeURIComponent(sql);
-  http.get('http://localhost:8889/sql/' + sql ,(res) => {}).on('error',(e)=>{
-    console.error(e);
-    return;
-  });
+/*
+1:switch to sql insert record
+2:run
+3:insert expeirment information to table schedule
+*/
+function run() {
+  //if (VFDB.sts.SV.length < 10) {//make sure communcation with VFDB is ok,then run and add record in schedule table
+    swtchSql = insSql;
+    setQ(VFDB.cmdASCII.run);
+    let sql = 'insert into schedule (expName,prdName,prdSn,runMode,strtHz,endHz,lpCount,lpTime) values (';
+    sql += `'${VFDB.expInfo.expName}','${VFDB.expInfo.prdName}','${VFDB.expInfo.prdSn}',`;
+    sql += `'${vfdbStatus.runMode}','${vfdbStatus.strtHz}','${vfdbStatus.endHz}','${vfdbStatus.loops}','${vfdbStatus.Ttm}')`;
+    sql = encodeURIComponent(sql);
+    http.get('http://localhost:8889/sql/' + sql, (res) => { }).on('error', (e) => {
+      console.error(e);
+      //return;
+    });
 }
 
-function stop(){
+/*
+1:set sql and function to noinsSql (an empty function)
+2:stop 
+3:set sv to 0
+4:update the end time in table schedule
+*/
+function stop() {
   swtchSql = noinsSql;
   swtchs = noinsSql;
   setQ(VFDB.cmdASCII.stop);
   setSV(0);
   clearTimeout(t2);
   let sql = 'update schedule set endTime=NULL order by id desc limit 1';
-  http.get('http://localhost:8889/sql/' + sql , (res) => {}).on('error',(e)=>{
+  http.get('http://localhost:8889/sql/' + sql, (res) => { }).on('error', (e) => {
     console.error(e);
   });
 }
-
+/*
+1:check Mutual Exclusive,if true then send command to U1;else queue the command
+2:if queued command more than three then clear queue and set 变频器未开机或通讯未连接给SV
+3: send status to Chrome
+*/
 function setQ(cmd) {
   if (VFDB.cmdASCII.Mutex) {
     VFDB.cmdASCII.Mutex = false;
@@ -236,7 +258,9 @@ function setQ(cmd) {
     VFDB.cmdASCII.Que.push(cmd);
     if (VFDB.cmdASCII.Que.length > 2) {
       VFDB.cmdASCII.Mutex = true;
-      VFDB.cmdASCII.QUE = [];
+      VFDB.cmdASCII.Que = [];
+      VFDB.sts.SV = '变频器未开机或通讯未连接';
+      sendsts();
     }
   }
 }
@@ -250,9 +274,11 @@ function chkQ() {
   VFDB.cmdASCII.Mutex = true;
 }
 
-function rldConf(){
+function rldConf() {
   VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
 }
+
+
 /*
 Web
 */
@@ -264,39 +290,39 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
   res.sendFile('/home/kenji/vibrator/index.htm');
 });
-
-app.get('/run', function(req, res) {
+/*
+app.get('/run', function (req, res) {
   run();
   res.send('run sent');
   res.end;
 });
-
-app.get('/stop', function(req, res) {
+*/
+app.get('/stop', function (req, res) {
   stop();
   res.send('stop sent');
   res.end;
 });
 
-app.get('/getPV', function(req, res) {
+app.get('/getPV', function (req, res) {
   setQ(VFDB.cmdASCII.getPV);
 });
 
-app.get('/setSV/:SV', function(req, res) {
+app.get('/setSV/:SV', function (req, res) {
   setSV(req.params.SV);
   res.send('ok');
   res.end;
 });
 
-app.get('/test/:cmd', function(req, res) {
+app.get('/test/:cmd', function (req, res) {
   setQ(':' + req.params.cmd + '\r\n');
   res.send(req.params.cmd);
   res.end;
 });
 
-app.get('/runFix',(req,res)=>{
+app.get('/runFix', (req, res) => {
   let a = new Date();
   vfdbStatus.strtTime = a.toLocaleString();
   vfdbStatus.endTime = "";
@@ -307,7 +333,7 @@ app.get('/runFix',(req,res)=>{
   res.end(JSON.stringify(vfdbStatus));
 })
 
-app.get('/runStps', function(req, res) {
+app.get('/runStps', function (req, res) {
   rldConf();
   let a = new Date();
   let b = new Date();
@@ -323,14 +349,14 @@ app.get('/runStps', function(req, res) {
   vfdbStatus.lvls = VFDB.stps.mltLvl.length;
 
   VFDB.stps.lvlPointer = 0;
-  VFDB.sts.loStp = [0,0];
-  setSV(0);
+  VFDB.sts.loStp = [0, 0];
+  //setSV(0);
   run();
   runStps();
   res.end(JSON.stringify(vfdbStatus));
 });
 
-app.get('/runLoga', function(req, res) {
+app.get('/runLoga', function (req, res) {
   rldConf();
   let a = new Date();
   let b = new Date();
@@ -344,10 +370,10 @@ app.get('/runLoga', function(req, res) {
   vfdbStatus.endHz = VFDB.lgrm.end;
   vfdbStatus.loops = VFDB.lgrm.loop;
 
-  if(VFDB.lgrm.strt > VFDB.lgrm.end){
+  if (VFDB.lgrm.strt > VFDB.lgrm.end) {
     VFDB.lgrm.k = -1;
     VFDB.lgrm.strt += 1;
-  }else{
+  } else {
     VFDB.lgrm.k = 1;
     VFDB.lgrm.strt -= 1;
   }
@@ -357,7 +383,7 @@ app.get('/runLoga', function(req, res) {
   VFDB.sts.loStp = [VFDB.lgrm.loop];
   swtchs = runLoga;
   run();
- 
+
   res.end(JSON.stringify(vfdbStatus));
 });
 
@@ -386,15 +412,15 @@ app.get('/runLinear', (req, res) => {
   res.end(JSON.stringify(vfdbStatus));
 });
 
-app.post('/saveConf',(req,res)=>{
+app.post('/saveConf', (req, res) => {
   let data = JSON.stringify(req.body);
   //console.log(req.body);
   //console.log(data);
-  
-  fs.writeFile('./client/VFD-B.json',data,'utf8',(err)=>{
-    if(!err){
+
+  fs.writeFile('./client/VFD-B.json', data, 'utf8', (err) => {
+    if (!err) {
       res.end('更新成功');
-    }else{
+    } else {
       res.end('更新失败，请再更新一次或联系供应商');
     }
     //VFDB = JSON.parse(fs.readFileSync('./client/VFD-B.json')); //reload the config of VFDB
@@ -402,7 +428,7 @@ app.post('/saveConf',(req,res)=>{
   });
 });
 
-app.get('/getStts',(req,res)=>{
+app.get('/getStts', (req, res) => {
   res.end(JSON.stringify(vfdbStatus));
 });
 
@@ -432,16 +458,16 @@ wss.on('error',()=>{
 });
 */
 
-wss.on('error',function error(err){
+wss.on('error', function error(err) {
   console.log('we error');
 });
 
 function sendsts() {
   wss.clients.forEach((conn) => {
-    try{
-    conn.send(JSON.stringify(VFDB.sts));
+    try {
+      conn.send(JSON.stringify(VFDB.sts));
     }
-    catch (e){
+    catch (e) {
       console.log(e);
     }
   });
@@ -456,4 +482,4 @@ process.on('uncaughtException', function (err) {
 ,function ack(err){
       console.log(err);
     });
-*/ 
+*/
