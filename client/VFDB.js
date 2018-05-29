@@ -62,7 +62,7 @@ $.getJSON('./client/VFD-B.json', (data) => {
     a[0].rows[i].cells[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
     a[0].rows[i].cells[3].innerText = testD.stps.mltLvl[i][1] % 60;
   }
-  $('#stts-table tbody tr td')[5].innerText = testD.stps.loop;
+  //$('#stts-table tbody tr td')[5].innerText = testD.stps.loop;
   $('#mmtable').editableTableWidget();
   a = testD.stps.loop * ($('#mmtable tfoot tr th')[2] * 60 + $('#mmtable tfoot tr th')[3]);
   $('#mmtable tfoot tr th')[6].innerText = parseInt(a / 60);
@@ -424,7 +424,7 @@ $('.updt').click(() => {
   }
   testD.stps.mltLvl = y;
   testD.stps.loop = parseInt($('#stpsloop')[0].innerText);
-  testD.stps.tm = $('#mmtable tfoot tr td')[1] * 60 + $('#mmtable tfoot tr td')[2];
+  testD.stps.tm = parseInt($('#mmtable tfoot tr th')[2] * 60 + $('#mmtable tfoot tr th')[3]);
   testD.lgrm.strt = parseInt($('#log-table tbody tr')[0].children[0].innerText);
   testD.lgrm.end = parseInt($('#log-table tbody tr')[0].children[1].innerText);
   //testD.lgrm.end > testD.lgrm.strt ? testD.lgrm.drc = 1: testD.lgrm.drc = -1;
