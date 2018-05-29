@@ -1,0 +1,19 @@
+{
+    "auth": {
+        "accessKeyId": "LTAIEqmkzUi4as1h",
+        "secretAccessKey": "OodMx1qkUkYD5Mq5QjV09eqdrSZs20"
+    },
+    "msgs": {
+        "PhoneNumbers": "18006200976",
+        "SignName": "义利盟FP01",
+        "TemplateCode": "SMS_135028446",
+        "TemplateParam": ""
+    },
+    "template":{
+      "expName":"",
+      "strtTime":"",
+      "endTime":"",
+      "proName":"",
+      "proSn":""
+    }
+}
