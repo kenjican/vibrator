@@ -5,7 +5,7 @@
   "main": "VFD-B.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "node --nolazy --inspect-brk=5858 mysql.js"
+    "debug": "node --nolazy --inspect-brk=5858 VFD-B.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/kenjican/vibrator#readme",
   "dependencies": {
-    "express-generator": "^4.16.0"
+    "@alicloud/sms-sdk": "^1.1.1",
+    "express-generator": "^4.16.0",
+    "nodemailer": "^4.6.4",
+    "ws": "^5.1.1"
   }
 }

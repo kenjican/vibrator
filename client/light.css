@@ -4,7 +4,7 @@
  */
 body{
   background-color:white;
-
+  overflow:hidden;
 }
 /*
 label{
@@ -12,6 +12,7 @@ label{
   font-size:1.5em;
 }
 */
+
 
 #ctrlboard>button{
   display:inline-block;
@@ -47,9 +48,18 @@ label{
 }
 
 #HzBarC {
-  widows: 1300px;
-  height:400px;
+  width: 80vw;
+  height:80vh;
 }
+
+.stts{
+  width:20vw;
+  height:80vh;
+  font-size:1.5vw;
+  background-color: lightblue;
+  text-align:center;
+}
+
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -78,20 +88,24 @@ table {
   text-align:center;
 }
 
+.row{
+  margin:0;
+}
 .config th{
   width:20%;
 }
 
-.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active{
-  background-color: #007BFF;
-  color:#fff;
-  font-weight:bold;
+
+.nav{
+  background-color: lightblue;
 }
 
-#ctrlBtn{
-  margin-right:10%;
-  margin-top:5%;
+
+.navbar{
+  font-size:2vw;
+  display:inline;
 }
+
 
 .modal-header{
   background-color: #007BFF;
@@ -115,55 +129,6 @@ table {
   color:whitesmoke;
 }
 
-.dropbtn {
-  background-color: #4CAF50;
-  color: white;
-  /*padding: 16px;*/
-  font-size: 1.7em;
-  border-radius: 5%;
-  cursor:pointer;
-  /*
-  position:fixed;
-  bottom:20px;
-  left:20px;
-  */
-}
-
-.dropup {
-  position: relative;
-  display: inline-block;
-  vertical-align: bottom;
-  z-index: 100;
-}
-
-.dropup-content {
-  border-radius: 5%;
-  display: none;
-  position: absolute;
-  background-color: #4CAF50;
-  min-width: 100%;
-  bottom: 45px;
-  font-size:1.5em;
-  z-index: 1;
-}
-
-.dropup-content a {
-  color: #4CAF50;
-  /*padding: 12px 16px;*/
-  text-decoration: none;
-  display: block;
-
-}
-/*
-.dropup-content a:hover {background-color: #ccc}
-*/
-.dropup:hover .dropup-content {
-  display: block;
-}
-
-.dropup:hover .dropbtn {
-  background-color: #3e8e41;
-}
 
 ul{
   list-style:none;
@@ -189,8 +154,12 @@ li {
   font-size:1.2em;
 }
 
-.nav{
-  padding-left: 30px;
+.dropdown-item{
+  background-color: lightblue;
+  font-size: 1.5rem;
+  margin:0;
+  border:0;
+  padding:0;
 }
 
 .tooltip-inner > table,th,td{

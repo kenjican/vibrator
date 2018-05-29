@@ -259,7 +259,7 @@ function setQ(cmd) {
     if (VFDB.cmdASCII.Que.length > 2) {
       VFDB.cmdASCII.Mutex = true;
       VFDB.cmdASCII.Que = [];
-      VFDB.sts.SV = '变频器未开机或通讯未连接';
+      VFDB.sts.SV = '变频器通讯异常';
       sendsts();
     }
   }
@@ -414,7 +414,7 @@ app.get('/runLinear', (req, res) => {
 
 app.post('/saveConf', (req, res) => {
   let data = JSON.stringify(req.body);
-  //console.log(req.body);
+  console.log(req.body);
   //console.log(data);
 
   fs.writeFile('./client/VFD-B.json', data, 'utf8', (err) => {

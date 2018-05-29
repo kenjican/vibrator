@@ -10,7 +10,7 @@
         "trigger": "axis"
       },
       "grid":[
-        {"x":"7%","y":"5%","width":"88%"}
+        {"x":"8%","y":"5%","width":"87%"}
       ],
       "toolbox": {
         "show": "true",

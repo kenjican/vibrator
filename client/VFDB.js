@@ -62,13 +62,13 @@ $.getJSON('./client/VFD-B.json', (data) => {
     a[0].rows[i].cells[2].innerText = parseInt(testD.stps.mltLvl[i][1] / 60);
     a[0].rows[i].cells[3].innerText = testD.stps.mltLvl[i][1] % 60;
   }
-  $('#stpsloop')[0].innerText = testD.stps.loop;
+  $('#stts-table tbody tr td')[5].innerText = testD.stps.loop;
   $('#mmtable').editableTableWidget();
-  // $('#mmtable').editableTableWidget().numericInputExample();//.find('td:second').focus();
-  a = testD.stps.loop * ($('#mmtable tfoot tr td')[2] * 60 + $('#mmtable tfoot tr td')[3]);
-  $('#mmtable tfoot tr th')[2].innerText = parseInt(testD.stps.tm / 60);
-  $('#mmtable tfoot tr th')[3].innerText = parseInt(testD.stps.tm % 60);
-  //$('#mmtable tfoot tr th')[7].innerText = testD.stps.loop % 60;
+  a = testD.stps.loop * ($('#mmtable tfoot tr th')[2] * 60 + $('#mmtable tfoot tr th')[3]);
+  $('#mmtable tfoot tr th')[6].innerText = parseInt(a / 60);
+  $('#mmtable tfoot tr th')[7].innerText = parseInt(a % 60);
+  $('#stpsloop')[0].innerText = parseInt(testD.stps.loop);
+  //$('#stsloop').innerText = parseInt(testD.stps.loop);
   a = $('#linear-table tbody tr td');
 
   a[0].innerText = testD.linear.strt;
@@ -84,20 +84,16 @@ $.getJSON('./client/VFD-B.json', (data) => {
   a[3].innerText = testD.lgrm.tm;
   $('#log-table tfoot tr th')[1].innerText = parseInt(testD.lgrm.tm * testD.lgrm.loop / 60) + ' 时' + (testD.lgrm.tm * testD.lgrm.loop % 60) + ' 分';
   $('#log-table').editableTableWidget();
-  a = $('#general-table tbody tr td')
-  a[0].innerText = testD.expInfo.expName;
-  a[1].innerText = testD.expInfo.prdName;
-  a[2].innerText = testD.expInfo.prdSn;
-  a[3].innerText = testD.expInfo.memo;
-  $('#general-table').editableTableWidget();
-  $('#exp-table tr td')[0].innerText = testD.expInfo.expName;
-  $('#exp-table tr td')[1].innerText = testD.expInfo.prdName;
-  $('#exp-table tr td')[2].innerText = testD.expInfo.prdSn;
-  $('#exp-table tr td')[0].innerText = testD.expInfo.expName;
-  //$('#memo-table p')[0].innerText = testD.expInfo.memo;
+
   $('#mmtable tbody tr').find('td').on('change', () => {
     updtStpTm();
   });
+
+  a = $('#fix-table tbody tr td');
+  a[0].innerText = testD.fixed.Hz;
+  a[1].innerText = testD.fixed.Arith;
+  $('#fix-table').editableTableWidget();
+
   updtStpTm();
   updtTooltip();
 });
@@ -108,13 +104,13 @@ $.getJSON('./client/VFD-B.json', (data) => {
 Websocket switch for different run mode
 */
 const wsSweep = (loStp) => {
-  let a = $('#opMode-table tbody tr td')[8].innerText - Math.ceil(loStp[0] / 2 - 1);
-  $('#opMode-table tbody tr td')[6].innerText = a;
+  let a = $('#stts-table tbody tr td')[10].innerText - Math.ceil(loStp[0] / 2 - 1);
+  $('#stts-table tbody tr td')[8].innerText = a;
 };
 
 const wsStps = (loStp) => {
-  $('#opMode-table tbody tr td')[6].innerText = loStp[0] + 1;
-  $('#opMode-table tbody tr td')[9].innerText = loStp[1];
+  $('#stts-table tbody tr td')[8].innerText = loStp[0] + 1;
+  $('#stts-table tbody tr td')[11].innerText = loStp[1];
 };
 
 const wsFix = () => { };
@@ -129,12 +125,12 @@ function rcws() {
   socket = new WebSocket('ws://' + window.location.hostname + ':8887');
   socket.onmessage = function (msg) {
     let a = JSON.parse(msg.data);
-    $('#time-table tr td')[3].innerText = a.SV;
+    $('#stts-table tbody tr td')[2].innerText = a.SV;
     $('#062001').innerText = a.SV;
     wsSwtch(a.loStp);
     if ((parseInt(a.stts.slice(0, 2), 16) & 0x10) == 0x10) {
-      $('#stsLight').css('background-color', 'red');
-      $('#stsLight').text("运转");
+      $('#stts-table tbody tr td')[0].style.backgroundColor = "red";
+      $('#stts-table tbody tr td')[0].innerText = "运转";
       DT.push(a.DT);
       //PV.push(a.PV);
       Hz.push(a.SV);
@@ -154,8 +150,8 @@ function rcws() {
       });
       return;
     }
-    $('#stsLight').css('background-color', 'green');
-    $('#stsLight').text("停止");
+    $('#stts-table tbody tr td')[0].style.backgroundColor = 'green';
+    $('#stts-table tbody tr td')[0].innerText = "停止";
   };
   /*
   websocket onclose event trigger reconnect every 5 seconds
@@ -189,69 +185,69 @@ function updtStts(data) {
   switch (vfdb.runMode) {
     case '定频':
       wsSwtch = wsFix;
-      $('#opMode-table tbody tr td')[0].innerText = '定频';
-      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
-      $('#time-table tbody tr td')[1].innerText = "";
-      $('#time-table tbody tr td')[2].innerText = "";
-      $('#opMode-table tbody tr')[1].hidden = true;
-      $('#opMode-table tbody tr')[2].hidden = true;
-      $('#opMode-table tbody tr')[3].hidden = true;
+      $('#stts-table tbody tr td')[1].innerText = '定频';
+      $('#stts-table tbody tr td')[3].innerText = vfdb.strtTime;
+      $('#stts-table tbody tr')[5].hidden = true;
+      $('#stts-table tbody tr')[6].hidden = true;
+      $('#stts-table tbody tr')[7].hidden = true;
       break;
 
     case '对数':
       wsSwtch = wsSweep;
-      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
-      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
-      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
-      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
-      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
-      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
-      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
-      $('#opMode-table tbody tr')[1].hidden = false;
-      $('#opMode-table tbody tr')[2].hidden = false;
-      $('#opMode-table tbody tr')[3].hidden = true;
+      $('#stts-table tbody tr td')[1].innerText = vfdb.runMode;
+      $('#stts-table tbody tr td')[3].innerText = vfdb.strtTime;
+      $('#stts-table tbody tr td')[4].innerText = vfdb.endTime;
+      $('#stts-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#stts-table tbody tr td')[5].innerText = vfdb.strtHz;
+      $('#stts-table tbody tr td')[7].innerText = vfdb.endHz;
+      $('#stts-table tbody tr td')[10].innerText = vfdb.loops;
+      $('#stts-table tbody tr')[5].hidden = false;
+      $('#stts-table tbody tr')[6].hidden = false;
+      $('#stts-table tbody tr')[7].hidden = true;
       break;
     case '线性':
       wsSwtch = wsSweep;
-      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
-      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
-      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
-      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
-      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
-      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
-      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
-      $('#opMode-table tbody tr')[1].hidden = false;
-      $('#opMode-table tbody tr')[2].hidden = false;
-      $('#opMode-table tbody tr')[3].hidden = true;
+      $('#stts-table tbody tr td')[1].innerText = vfdb.runMode;
+      $('#stts-table tbody tr td')[3].innerText = vfdb.strtTime;
+      $('#stts-table tbody tr td')[4].innerText = vfdb.endTime;
+      //$('#stts-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#stts-table tbody tr td')[5].innerText = vfdb.strtHz;
+      $('#stts-table tbody tr td')[7].innerText = vfdb.endHz;
+      $('#stts-table tbody tr td')[10].innerText = vfdb.loops;
+      $('#stts-table tbody tr')[5].hidden = false;
+      $('#stts-table tbody tr')[6].hidden = false;
+      $('#stts-table tbody tr')[7].hidden = true;
+
       break;
     case '多阶':
       wsSwtch = wsStps;
-      $('#opMode-table tbody tr td')[0].innerText = vfdb.runMode;
-      $('#time-table tbody tr td')[0].innerText = vfdb.strtTime;
-      $('#time-table tbody tr td')[1].innerText = vfdb.endTime;
-      $('#time-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
-      $('#opMode-table tbody tr td')[3].innerText = vfdb.strtHz;
-      $('#opMode-table tbody tr td')[5].innerText = vfdb.endHz;
-      $('#opMode-table tbody tr td')[8].innerText = vfdb.loops;
-      $('#opMode-table tbody tr td')[11].innerText = vfdb.lvls;
-      $('#opMode-table tbody tr')[1].hidden = false;
-      $('#opMode-table tbody tr')[2].hidden = false;
-      $('#opMode-table tbody tr')[3].hidden = false;
+      $('#stts-table tbody tr td')[1].innerText = vfdb.runMode;
+      $('#stts-table tbody tr td')[3].innerText = vfdb.strtTime;
+      $('#stts-table tbody tr td')[4].innerText = vfdb.endTime;
+      //$('#stts-table tbody tr td')[2].innerText = parseInt(vfdb.Ttm / 60) + ' 时' + (vfdb.Ttm % 60) + ' 分';
+      $('#stts-table tbody tr td')[5].innerText = vfdb.strtHz;
+      $('#stts-table tbody tr td')[7].innerText = vfdb.endHz;
+      $('#stts-table tbody tr td')[10].innerText = vfdb.loops;
+      $('#stts-table tbody tr td')[13].innerText = vfdb.lvls;
+      $('#stts-table tbody tr')[5].hidden = false;
+      $('#stts-table tbody tr')[6].hidden = false;
+      $('#stts-table tbody tr')[7].hidden = false;
       break;
 
     case '外控':
 
       break;
     default:
-      $('#opMode-table tbody tr td')[0].innerText = '';
+      $('#stts-table tbody tr td')[0].innerText = '';
       break;
   }
 }
 
 
 
-function run() {
-  $.get($('input[name=opMode]:checked').val(), (data) => {
+function run(md) {
+  clearChart();
+  $.get('./' + md, (data) => {
     updtStts(data);
   });
 
@@ -359,6 +355,12 @@ $('.setB').bind('click', function () {
   $.get('/test/' + cmd);
 });
 
+$('.dropdown-item').bind('click', function () {
+  clearChart();
+  run(this.id);
+});
+
+
 $('#stpup').click(() => {
   $('#062001')[0].stepUp(5);
   $('#setSV').click();
@@ -409,7 +411,7 @@ $('#dRow').click(() => {
 /*
 update conf data to server
 */
-$('#updt').click(() => {
+$('.updt').click(() => {
   let y = [];
 
   for (let i = 0; i < $('#mmtable tbody tr').length; i++) {
@@ -433,10 +435,8 @@ $('#updt').click(() => {
   testD.linear.end = parseInt($('#linear-table tbody tr')[0].children[1].innerText);
   testD.linear.loop = parseInt($('#linear-table tbody tr')[0].children[2].innerText);
   testD.linear.tm = parseInt($('#linear-table tbody tr')[0].children[3].innerText);
-  testD.expInfo.expName = $('#general-table tbody tr td')[0].innerText;
-  testD.expInfo.prdName = $('#general-table tbody tr td')[1].innerText;
-  testD.expInfo.prdSn = $('#general-table tbody tr td')[2].innerText;
-  testD.expInfo.memo = $('#general-table tbody tr td')[3].innerText;
+  testD.fixed.Hz = parseInt($('#fix-table tbody tr td')[0].innerText);
+  testD.fixed.Arith = parseInt($('#fix-table tbody tr td')[1].innerText);
   let data = JSON.stringify(testD);
   $.ajax({
     type: 'POST',
@@ -444,10 +444,10 @@ $('#updt').click(() => {
     contentType: 'application/json',
     data: data
   }).done((res) => {
-    $('#updtAlert').css('display', 'inline-block');
-    $('#updtAlert').html(res);
-    $('#updtAlert').fadeTo(1000, 500).slideUp(500, () => {
-      $('#updtAlert').slideUp(500);
+    $('.updtAlert').css('display', 'inline-block');
+    $('.updtAlert').html(res);
+    $('.updtAlert').fadeTo(1000, 500).slideUp(500, () => {
+      $('.updtAlert').slideUp(500);
     });
   });
 });
@@ -458,20 +458,40 @@ $("#ssS").change(() => {
   $("#sheet").attr("href", $("#ssS").val());
 });
 
+/*
+Change line color
+*/
+
+function updtColor(clr) {
+  let a = {
+    series: {
+      name: "Hz",
+      type: "line",
+      itemStyle: {
+        normal: {
+          color: "red"
+        }
+      }
+    }
+  }
+
+  a.series.itemStyle.normal.color = clr;
+  HzBarC.setOption(a);
+}
 
 
 /*
 modal & menu draggable
 */
 
-$('#opModal').draggable({
+$('.modal').draggable({
   handle: ".modal-header,.modal-footer"
 })
-
-$('#confModal').draggable({
+/*
+$('#mltLvlModal').draggable({
   handle: ".modal-header,.modal-footer"
 })
-
+*/
 /*
 update tooltip content
 */
@@ -499,7 +519,7 @@ $('#log-table tbody tr').find('td').on('change', () => {
   updtTooltip();
 });
 
-$('#stpsloop').on('change',() => {
+$('#stpsloop').on('change', () => {
   updtStpTm();
 });
 
