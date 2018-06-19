@@ -21,6 +21,9 @@
     "@alicloud/sms-sdk": "^1.1.1",
     "express-generator": "^4.16.0",
     "nodemailer": "^4.6.4",
-    "ws": "^5.1.1"
+    "ws": "^5.1.1",
+    "body-parser":"",
+    "mysql":"",
+    "express":"^4.16.3"
   }
 }
