@@ -328,7 +328,7 @@ app.get('/runFix', (req, res) => {
   vfdbStatus.endTime = "";
   vfdbStatus.Ttm = "";
   vfdbStatus.runMode = "定频";
-  vfdbStatus
+  setSV(VFDB.fixed.Hz);
   run();
   res.end(JSON.stringify(vfdbStatus));
 })

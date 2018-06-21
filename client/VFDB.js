@@ -6,6 +6,13 @@ let DT = [],
   Hz = [];
 let testD;
 let echartOption = {};
+
+/**
+ *full screen
+ */
+
+
+
 /*
 first step is to build DOM tree,then could bind event and render data
 */
@@ -97,7 +104,6 @@ $.getJSON('./client/VFD-B.json', (data) => {
   updtStpTm();
   updtTooltip();
 });
-
 
 
 /*
@@ -360,10 +366,21 @@ $('.dropdown-item').bind('click', function () {
   run(this.id);
 });
 
-
+/*
 $('#stpup').click(() => {
   $('#062001')[0].stepUp(5);
   $('#setSV').click();
+});
+
+$('#stpdown').click(() => {
+  $('#062001')[0].stepDown(5);
+  $('#setSV').click();
+});
+*/
+
+$('#stpup').click(() => {
+  $.get('./setSV/' + (parseInt($('stts-table tbody tr td')[2].innerText)+ parseInt($('#fix-table tbody tr td')[1].innerText)));
+  //$('#setSV').click();
 });
 
 $('#stpdown').click(() => {
@@ -424,7 +441,7 @@ $('.updt').click(() => {
   }
   testD.stps.mltLvl = y;
   testD.stps.loop = parseInt($('#stpsloop')[0].innerText);
-  testD.stps.tm = parseInt($('#mmtable tfoot tr th')[2] * 60 + $('#mmtable tfoot tr th')[3]);
+  testD.stps.tm = parseInt($('#mmtable tfoot tr th')[2].innerText * 60) + parseInt($('#mmtable tfoot tr th')[3].innerText);
   testD.lgrm.strt = parseInt($('#log-table tbody tr')[0].children[0].innerText);
   testD.lgrm.end = parseInt($('#log-table tbody tr')[0].children[1].innerText);
   //testD.lgrm.end > testD.lgrm.strt ? testD.lgrm.drc = 1: testD.lgrm.drc = -1;

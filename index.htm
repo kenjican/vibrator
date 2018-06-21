@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8">
   <meta lang="zh">
@@ -12,9 +11,10 @@
 </head>
 
 <body>
-  <div class="nav justify-content-center">
-    <nav class="navbar navbar-expand-md justify-content-center">
+
+    <nav class="navbar navbar-expand-md">
       <!-- Links -->
+      <div class="nav justify-content-center">
       <ul class="navbar-nav">
         <!--
         <li class="nav-item" data-toggle="modal" data-target="#opModal">
@@ -50,21 +50,10 @@
         <li class="nav-item">
           <a class="nav-link" href="javascript:stop();">停止</a>
         </li>
-        <!--
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-            设定
-            </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">运转设定</a>
-                <a class="dropdown-item" href="#">一般设定</a>
-              </div>
-        </li>
-        -->
       </ul>
-
+      </div>
     </nav>
-  </div>
+
 
   <div class="row">
     <div id="HzBarC"></div>
@@ -131,9 +120,11 @@
           <div id="ctrlboard">
             <button type="button" value="run" id="runB">run</button>
             <button type="button" value="stop" id="stopB">stop</button>
+            <!--
             <button type="button" id="stpdown">递减</button>
             <input type="number" value="0" id="062001" min="0" max="100">
             <button type="button" id="stpup">递增</button>
+            -->
             <button type="button" value="设频率" id="setSV" class="setB">setSV</button>
             <br>
             <label class="opL" data-html="true" data-toggle="tooltip" data-placement="bottom">
@@ -196,6 +187,8 @@
           </table>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="stpup">递减</button>
+            <button type="button" class="btn btn-primary" id="stpdown">递增</button>
             <div class="alert alert-success updtAlert" style="display:none"></div>
             <button type="button" class="btn btn-primary updt" >更新</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
